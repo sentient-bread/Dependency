@@ -1,8 +1,8 @@
 import torch
 from icecream import ic
 
-class Dataset():
-  def __init__(self, trainfile="/Volumes/Untitled/ud-treebanks-v2.9/UD_English-Atis/en_atis-ud-train.conllu"):
+class Dataset(torch.utils.data.Dataset):
+  def __init__(self, trainfile=None):
     self.trainfile = trainfile
     self.vocab = []
     self.freqs = {}
@@ -14,7 +14,6 @@ class Dataset():
                                'NOUN',  'NUM', 'PART', 'PRON', 'PROPN', 'PUNCT',
                                'SCONJ', 'SYM', 'VERB', 'X'])}
 
-  def get_data(self):
     dataset = []
     words = []
     postags = []
@@ -22,22 +21,27 @@ class Dataset():
 
     freqs = {}
     with open(self.trainfile, "r") as f:
-      for line in f:
+      lines = f.readlines()
+
+      for line in lines:
+        # Comment line
         if (len(line) > 0 and line[0] == '#'):
           continue
 
-        line = line[:-1]
+        line = line.strip('\n')
+        # Non-empty line
         if (len(line) > 0):
           columns = line.split('\t')
 
-          words.append(columns[1])
-          heads.append(int(columns[6]))
-          postags.append(columns[3])
+          WORD_INDEX, POS_INDEX, HEAD_INDEX = 1, 3, 6
+          words.append(columns[WORD_INDEX])
+          postags.append(columns[POS_INDEX])
+          heads.append(int(columns[HEAD_INDEX]))
 
           try: freqs[columns[1]] += 1
           except KeyError: freqs[columns[1]] = 1
 
-
+        # Empty line implies that a sentence is finished
         else:
           dataset.append((words, postags, heads))
           self.vocab += words
@@ -62,3 +66,9 @@ class Dataset():
     try: idx = self.words_to_indices[word]
     except KeyError: idx = len(self.vocab) - 1
     return idx
+
+  def __len__(self):
+    return len(self.dataset)
+
+  def __getitem__(self, index):
+    return self.dataset[index]
