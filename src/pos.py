@@ -21,7 +21,9 @@ class POSTag(nn.Module):
 
     self.lstm = nn.LSTM(embedding_dimension, hidden_size, bidirectional=True, batch_first=True)
 
-    self.classifier = MLP(hidden_size, output_size)
+    self.classifier = MLP(hidden_size*2, output_size)
+    # the multiplied by 2 is because of bilstm
+    # the final output will be of hidden_size * 2
 
     self.linear = nn.Linear(output_size, num_pos_tags, bias=True)
 
@@ -32,12 +34,12 @@ class POSTag(nn.Module):
     each row represents a sentence
     THATS IT
     """
-
     embedded = self.embedding_layer(batch)
 
     lstm_outputs, (last_hidden_state, last_cell_state) = self.lstm(embedded)
 
-    classifier_outputs = self.classifier(last_hidden_state)
+
+    classifier_outputs = self.classifier(lstm_outputs)
     # MLP Classifier
 
     affine_layer_outputs = self.linear(classifier_outputs)
@@ -53,24 +55,44 @@ class POSTag(nn.Module):
 def train_epoch(model, optimizer, loss_fun, dataloader):
 
   for batch in dataloader:
-    ic(batch.shape)
     out = model(batch[:, 0, :])
-    prob_dis = model.predict(out)
-    ic(out.shape)
-    ic(prob_dis.shape)
-    ic(out, prob_dis)
+    most_likely = model.predict(out)
+    out_swapped = torch.swapaxes(out, 1, 2)
+    loss = loss_fun(out_swapped, batch[:, 1, :])
+    # assuming that the loss function is cross entropy loss
+    # out is a set embeddings making sentences that make batches
+    # on the comparison we just give it the pos tags
+
+    loss.backward()
+    ic(loss)
+    optimizer.step()
+    optimizer.zero_grad()
+
+def train(model, optimizer, loss_fun, dataset, num_epochs):
+
+  for epoch in range(num_epochs):
+    print(f"{epoch+1}")
+    dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=BATCH_SIZE)
+    train_epoch(model, optimizer, loss_fun, dataloader)
+    print("-------")
+    torch.save(model.state_dict(), POS_MODEL_PATH)
 
 
-# test_dataset = Dataset(trainfile='../data/UD_English-Atis/en_atis-ud-test.conllu')
+
+test_dataset = Dataset(trainfile='../data/UD_English-Atis/en_atis-ud-test.conllu')
 # test_dataloader = torch.utils.data.DataLoader(test_dataset, shuffle=True, batch_size=BATCH_SIZE)
 
 
-# model = POSTag(
-#               18,
-#               len(test_dataset.vocab),
-#               100,
-#               50,
-#               18).to(DEVICE)
 
+model = POSTag(
+              18,
+              len(test_dataset.vocab),
+              100,
+              50,
+              18).to(DEVICE)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
+loss_fun = torch.nn.CrossEntropyLoss()
+
+train(model, optimizer, loss_fun, test_dataset, 100)
 # train_epoch(model, None, None, test_dataloader)
