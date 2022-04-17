@@ -57,7 +57,7 @@ class Dataset(torch.utils.data.Dataset):
 
     metatokens = [ '<BOS>', '<PAD>', '<UNK>' ]
     for tok in metatokens:
-      freqs[tok] = 1
+      freqs.update({tok: 1})
 
     self.vocab = list(set(self.vocab))
     self.vocab = list(filter(lambda x: freqs[x] > 0, self.vocab))
