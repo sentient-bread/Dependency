@@ -79,14 +79,14 @@ def train(model, optimizer, loss_fun, dataset, num_epochs):
 
 
 
-test_dataset = Dataset(trainfile='../data/UD_English-Atis/en_atis-ud-test.conllu')
+train_dataset = Dataset(False, file_path='../data/UD_English-Atis/en_atis-ud-train.conllu')
 # test_dataloader = torch.utils.data.DataLoader(test_dataset, shuffle=True, batch_size=BATCH_SIZE)
 
 
 
 model = POSTag(
               18,
-              len(test_dataset.vocab),
+              len(train_dataset.vocab),
               100,
               50,
               18).to(DEVICE)
@@ -94,5 +94,18 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
 loss_fun = torch.nn.CrossEntropyLoss()
 
-train(model, optimizer, loss_fun, test_dataset, 100)
+train(model, optimizer, loss_fun, train_dataset, 10)
 # train_epoch(model, None, None, test_dataloader)
+
+def test_model(model, test_file_path, vocab, words_to_index):
+  test_dataset = Dataset(True, vocab=vocab, words_to_indices=words_to_index, file_path=test_file_path)
+  dataloader = torch.utils.data.DataLoader(test_dataset)
+
+  for batch in dataloader:
+    pred = model(batch[:, 0, :])
+    pred = model.predict(pred)
+    ic(pred, batch[:, 1, :])
+
+test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
+
+test_model(model, test_file_path, train_dataset.vocab, train_dataset.words_to_indices)
