@@ -8,17 +8,27 @@ PAD_DEPENDENCY = -1
 
 
 class Dataset(torch.utils.data.Dataset):
-  def __init__(self, trainfile=None):
+
+  def __init__(self, from_vocab=False, file_path=None, vocab=None, words_to_indices=None):
+    # cheap constructor overloading
+
+    self.tags_to_indices = {tag: index for index, tag in enumerate(
+                              ['ADJ',   'ADP', 'ADV',  'AUX',  'CCONJ', 'DET', 'INTJ',
+                               'NOUN',  'NUM', 'PART', 'PRON', 'PROPN', 'PUNCT',
+                               'SCONJ', 'SYM', 'VERB', 'X', 'NULL'])}
+    if from_vocab:
+      self.__init_from_vocab__(vocab, words_to_indices, file_path)
+    else:
+      self.__init_make_vocab__(file_path)
+
+  def __init_make_vocab__(self, trainfile=None):
     self.trainfile = trainfile
     self.vocab = []
     self.freqs = {}
     self.words_to_indices = {}
     self.dataset = []
 
-    self.tags_to_indices = {tag: index for index, tag in enumerate(
-                              ['ADJ',   'ADP', 'ADV',  'AUX',  'CCONJ', 'DET', 'INTJ',
-                               'NOUN',  'NUM', 'PART', 'PRON', 'PROPN', 'PUNCT',
-                               'SCONJ', 'SYM', 'VERB', 'X', 'NULL'])}
+
 
     self.length_longest_sequence = 0
     # to store the length of the longest sequence
@@ -90,6 +100,68 @@ class Dataset(torch.utils.data.Dataset):
       heads_indices = [word_indices[i] if i != -1 else -1 for i in heads]
 
       self.dataset.append((word_indices, tag_indices, heads_indices))
+
+  def __init_from_vocab__(self, vocab, words_to_indices, file_path):
+    self.vocab = vocab
+    self.words_to_indices = words_to_indices
+    self.file_path = file_path
+    dataset = []
+    words = []
+    postags = []
+    heads = []
+
+    self.dataset = []
+
+    self.length_longest_sequence = 0
+
+    with open(self.file_path, "r") as f:
+      lines = f.readlines()
+
+      for line in lines:
+
+        len_last_read = len(words)
+        if (len_last_read > self.length_longest_sequence):
+          self.length_longest_sequence = len_last_read
+
+        # Comment line
+        if (len(line) > 0 and line[0] == '#'):
+          continue
+
+        line = line.strip('\n')
+        # Non-empty line
+        if (len(line) > 0):
+          columns = line.split('\t')
+
+          WORD_INDEX, POS_INDEX, HEAD_INDEX = 1, 3, 6
+          words.append(columns[WORD_INDEX])
+          postags.append(columns[POS_INDEX])
+          heads.append(int(columns[HEAD_INDEX]))
+
+        else:
+          words.insert(0, '<BOS>')
+          postags.insert(0, 'NULL')
+          heads.insert(0, -1)
+          # This -1 does NOT mean that the head of <BOS> is the last word
+          # in the sentence. It means that the head of <BOS> is itself.
+
+          dataset.append((words, postags, heads))
+
+          words = []
+          postags = []
+          heads = []
+
+
+    for (words, tags, heads) in dataset:
+      word_indices = [self.index(word) for word in words]
+      tag_indices = [self.tags_to_indices[tag] for tag in tags]
+      # converts sentence indices to vocabulary indices
+      heads_indices = [word_indices[i] if i != -1 else -1 for i in heads]
+
+      self.dataset.append((word_indices, tag_indices, heads_indices))
+
+
+
+
 
   def index(self, word):
     try: idx = self.words_to_indices[word]
