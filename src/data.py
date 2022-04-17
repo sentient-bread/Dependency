@@ -1,11 +1,11 @@
 import torch
 from icecream import ic
+from settings import *
 
 PAD_DEPENDENCY = -1
 # the dependency set will use -1 tokens as a pad
 # The reason is that -1 refers to the dummy head
 
-BATCH_SIZE = 100
 
 class Dataset(torch.utils.data.Dataset):
   def __init__(self, trainfile=None):
@@ -104,7 +104,7 @@ class Dataset(torch.utils.data.Dataset):
     to_ret = self.dataset[index]
     seq_length = len(to_ret[0])
     amount_to_pad = self.length_longest_sequence - seq_length
-    to_ret_tensor = torch.tensor(to_ret)
+    to_ret_tensor = torch.tensor(to_ret).to(DEVICE)
     to_ret_padded = torch.nn.functional.pad(to_ret_tensor, (0, amount_to_pad), "constant", 0)
 
     to_ret_padded[0] = torch.nn.functional.pad(
@@ -130,3 +130,6 @@ class Dataset(torch.utils.data.Dataset):
 # test_dataset = Dataset(trainfile='../data/UD_English-Atis/en_atis-ud-test.conllu')
 # test_dataloader = torch.utils.data.DataLoader(test_dataset, shuffle=True, batch_size=BATCH_SIZE)
 
+# for batch in test_dataloader:
+
+#   ic(batch[:, 0, :], batch[:, 0, :].shape)
