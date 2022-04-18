@@ -7,15 +7,23 @@ from settings import *
 
 
 class POSTag(nn.Module):
-  def __init__(self, output_size, vocab_size, embedding_dimension, hidden_size, num_pos_tags):
+  def __init__(self, output_size, vocab_size, embedding_dimension, hidden_size, num_pos_tags, vocab=None, words_to_indices=None):
 
     """
     as per the paper
     output_size = num_pos_tags = 17 (in our case 18)
 
     we have them as different variables for now, for experimentation
+
+    vocab argument is to be given only during training
+    It represents the vocabulary used for training
+    similarly for words to indices
     """
     super().__init__()
+
+    self.vocab = vocab
+    self.words_to_indices = words_to_indices
+
     self.embedding_layer = nn.Embedding(vocab_size, embedding_dimension)
     # may be pretrained
 
