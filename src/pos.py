@@ -83,37 +83,72 @@ def train(model, optimizer, loss_fun, dataset, num_epochs):
     dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=BATCH_SIZE)
     train_epoch(model, optimizer, loss_fun, dataloader)
     print("-------")
-    torch.save(model.state_dict(), POS_MODEL_PATH)
+    torch.save(model, POS_MODEL_PATH)
+
+
+def train_POS(train_path, num_epochs):
+
+  train_dataset = Dataset(False, file_path=train_path)
+  # test_dataloader = torch.utils.data.DataLoader(test_dataset, shuffle=True, batch_size=BATCH_SIZE)
 
 
 
-train_dataset = Dataset(False, file_path='../data/UD_English-Atis/en_atis-ud-train.conllu')
-# test_dataloader = torch.utils.data.DataLoader(test_dataset, shuffle=True, batch_size=BATCH_SIZE)
+  model = POSTag(
+                18,
+                len(train_dataset.vocab),
+                100,
+                50,
+                18,
+                vocab=train_dataset.vocab,
+                words_to_indices=train_dataset.words_to_indices).to(DEVICE)
+
+  optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+  loss_fun = torch.nn.CrossEntropyLoss()
+
+  train(model, optimizer, loss_fun, train_dataset, num_epochs)
+  # train_epoch(model, None, None, test_dataloader)
 
 
 
-model = POSTag(
-              18,
-              len(train_dataset.vocab),
-              100,
-              50,
-              18).to(DEVICE)
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+def test_model(model, test_file_path):
 
-loss_fun = torch.nn.CrossEntropyLoss()
+  test_dataset = Dataset(True, vocab=model.vocab, words_to_indices=model.words_to_indices, file_path=test_file_path)
+  # test_dataset initialized with vocabulary taken from loaded model
 
-train(model, optimizer, loss_fun, train_dataset, 10)
-# train_epoch(model, None, None, test_dataloader)
-
-def test_model(model, test_file_path, vocab, words_to_index):
-  test_dataset = Dataset(True, vocab=vocab, words_to_indices=words_to_index, file_path=test_file_path)
   dataloader = torch.utils.data.DataLoader(test_dataset)
+
+  total_batches = 0
+  sum_accuracy = 0
 
   for batch in dataloader:
     pred = model(batch[:, 0, :])
     pred = model.predict(pred)
-    ic(pred, batch[:, 1, :])
+    total_tokens = 0
+    accurate_tokens = 0
 
-test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
+    for i in range(pred.shape[-1]):
+      if batch[:, 1, i] != 17:
+        if pred[:, i] == batch[:, 1, i]:
+          accurate_tokens += 1
+        total_tokens += 1
+    accuracy = accurate_tokens / total_tokens
 
-test_model(model, test_file_path, train_dataset.vocab, train_dataset.words_to_indices)
+    sum_accuracy += accuracy
+    total_batches += 1
+
+  average_accuracy = sum_accuracy / total_batches
+
+  ic(average_accuracy)
+
+# train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
+
+# train_POS(train_path, 20)
+
+# load_model = torch.load(POS_MODEL_PATH).to(DEVICE)
+
+# ic(load_model.vocab)
+
+# test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
+
+# test_model(load_model, test_file_path)
