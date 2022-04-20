@@ -178,20 +178,25 @@ class Dataset(torch.utils.data.Dataset):
     amount_to_pad = self.length_longest_sequence - seq_length
     to_ret_tensor = torch.tensor(to_ret).to(DEVICE)
     to_ret_padded = torch.nn.functional.pad(to_ret_tensor, (0, amount_to_pad), "constant", 0)
+    # above padding was done just to change dimensionality
 
-    to_ret_padded[0] = torch.nn.functional.pad(
-                                  to_ret_tensor[0],
+    index_of_sentence = 0
+    index_of_pos_tags = 1
+    index_of_tree_info = 2
+
+    to_ret_padded[index_of_sentence] = torch.nn.functional.pad(
+                                  to_ret_tensor[index_of_sentence],
                                   (0, amount_to_pad),
                                   "constant",
                                   len(self.vocab)-2)
 
-    to_ret_padded[1] = torch.nn.functional.pad(to_ret_tensor[1],
+    to_ret_padded[index_of_pos_tags] = torch.nn.functional.pad(to_ret_tensor[index_of_pos_tags],
                                               (0, amount_to_pad),
                                               "constant",
                                               len(self.tags_to_indices)-1
                                               )
 
-    to_ret_padded[2] = torch.nn.functional.pad(to_ret_tensor[2],
+    to_ret_padded[index_of_tree_info] = torch.nn.functional.pad(to_ret_tensor[index_of_tree_info],
                                               (0, amount_to_pad),
                                               "constant",
                                               PAD_DEPENDENCY,
