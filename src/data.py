@@ -6,9 +6,7 @@ PAD_DEPENDENCY = -1
 # the dependency set will use -1 tokens as a pad
 # The reason is that -1 refers to the dummy head
 
-
 class Dataset(torch.utils.data.Dataset):
-
   def __init__(self, from_vocab=False, file_path=None, vocab=None, words_to_indices=None):
     # cheap constructor overloading
 
@@ -28,11 +26,9 @@ class Dataset(torch.utils.data.Dataset):
     self.words_to_indices = {}
     self.dataset = []
 
-
-
     self.length_longest_sequence = 0
     # to store the length of the longest sequence
-
+    
     dataset = []
     words = []
     postags = []
@@ -43,7 +39,6 @@ class Dataset(torch.utils.data.Dataset):
       lines = f.readlines()
 
       for line in lines:
-
         len_last_read = len(words)
         if (len_last_read > self.length_longest_sequence):
           self.length_longest_sequence = len_last_read
@@ -98,7 +93,6 @@ class Dataset(torch.utils.data.Dataset):
       tag_indices = [self.tags_to_indices[tag] for tag in tags]
       # converts sentence indices to vocabulary indices
       heads_indices = [word_indices[i] if i != -1 else -1 for i in heads]
-
       self.dataset.append((word_indices, tag_indices, heads_indices))
 
   def __init_from_vocab__(self, vocab, words_to_indices, file_path):
@@ -150,7 +144,6 @@ class Dataset(torch.utils.data.Dataset):
           postags = []
           heads = []
 
-
     for (words, tags, heads) in dataset:
       word_indices = [self.index(word) for word in words]
       tag_indices = [self.tags_to_indices[tag] for tag in tags]
@@ -158,10 +151,6 @@ class Dataset(torch.utils.data.Dataset):
       heads_indices = [word_indices[i] if i != -1 else -1 for i in heads]
 
       self.dataset.append((word_indices, tag_indices, heads_indices))
-
-
-
-
 
   def index(self, word):
     try: idx = self.words_to_indices[word]
