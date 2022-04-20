@@ -4,7 +4,10 @@ import torch
 from icecream import ic
 
 class EdgeScorer(nn.Module):
-  def __init__(self, output_size, vocab_size, word_embedding_dimension, pos_embedding_dimension, hidden_size, num_pos_tags, sentence_length, vocab=None, words_to_indices=None, pos_tagger):
+  def __init__(self, output_size, vocab_size,
+               word_embedding_dimension, hidden_size,
+               pos_embedding_dimension, num_pos_tags, pos_tagger,
+               sentence_length, vocab=None, words_to_indices=None):
     nn.Module.__init__(self)
 
     self.vocab = vocab
@@ -26,6 +29,7 @@ class EdgeScorer(nn.Module):
     self.bias_arc = nn.Linear(output_size, sentence_length, bias=False)
     # Treat these as just matrices, not NN layers
     # It's just to make training and mat mult convenient afaiu
+    # Probabilities = H_head @ (W_arc @ H_dep + B_arc)
 
   def forward(self, batch):
     words_embedded = self.word_embedding_layer(batch)
