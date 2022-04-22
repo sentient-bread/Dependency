@@ -5,6 +5,10 @@ from copy import deepcopy
 from math import inf
 
 def get_cycles(mst):
+    """
+    Takes in a tentative MST and returns a list
+    of all components containing cycles.
+    """
     cycles = []
     for node in range(len(mst)):
         already_seen = any(node in cycle for cycle in cycles)
@@ -58,6 +62,11 @@ def get_cycles(mst):
     return cyclic_components
 
 def best_incoming_to_cycle(component, scores):
+    """
+    Given a component containing a cycle, finds
+    the highest-scored incoming edge to that cycle.
+    (NOT to the component)
+    """
     cycle, not_in_cycle = component
     component = cycle + not_in_cycle
     # cycle = list of nodes actually part of a cycle
@@ -83,6 +92,10 @@ def best_incoming_to_cycle(component, scores):
     return best_edge
 
 def get_MST(graph, scores):
+    """
+    Given a graph and a score matrix, finds
+    the MST.
+    """
 
     mst = [[]]*(len(graph))
     for i in range(1, len(graph)):
