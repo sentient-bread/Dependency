@@ -2,6 +2,9 @@ from torch import nn
 from embedding import MLP
 import torch
 from icecream import ic
+from data import *
+from settings import *
+from pos import *
 
 class EdgeScorer(nn.Module):
   def __init__(self, output_size, vocab_size,
@@ -71,3 +74,40 @@ class EdgeScorer(nn.Module):
 
     # Most likely head for each dependent
     return scores.argmax(dim=2)
+
+def train_epoch(model, optimizer, loss_fun, dataloader):
+  for batch in dataloader:
+    pred = model(batch[:, 0, :])
+    targ = batch[:, 2, :]
+    loss = loss_fun(pred, targ)
+    
+    loss.backward()
+    ic(loss)
+    optimizer.step()
+    optimizer.zero_grad()
+
+def train(model, optimizer, loss_fun, dataset, num_epochs):
+    for epoch in range(num_epochs):
+      print(f"{epoch+1}")
+      dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=BATCH_SIZE)
+      train_epoch(model, optimizer, loss_fun, dataloader)
+      print("-------")
+      torch.save(model, EDGESCORER_MODEL_PATH)
+
+def train_edgescorer(train_path, num_epochs):
+  train_dataset = Dataset(from_vocab=False, file_path=train_path, vocab=None, words_to_indices=None)
+
+  postagger = torch.load(POS_MODEL_PATH, map_location=torch.device('cpu'))
+  postagger.eval()
+  model = EdgeScorer(100, len(train_dataset.vocab),
+                     100, 50,
+                     100, 18, postagger,
+                     sentence_length=train_dataset.length_longest_sequence,
+                     vocab=train_dataset.vocab,
+                     words_to_indices=train_dataset.words_to_indices)
+
+  optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+  loss_fun = torch.nn.CrossEntropyLoss(ignore_index=PAD_DEPENDENCY)
+
+  train(model, optimizer, loss_fun, train_dataset, num_epochs)
