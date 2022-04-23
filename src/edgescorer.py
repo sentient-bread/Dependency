@@ -29,7 +29,8 @@ class EdgeScorer(nn.Module):
     # *2 because the LSTM is bidirectional
 
     self.weight_arc = nn.Linear(output_size, output_size, bias=False)
-    self.bias_arc = nn.Linear(output_size, sentence_length, bias=False)
+    #self.bias_arc = nn.Linear(output_size, sentence_length, bias=False)
+    self.bias_arc = nn.Linear(output_size, 1, bias=False)
     # Treat these as just matrices, not NN layers
     # It's just to make training and mat mult convenient afaiu
     # Probabilities = H_head @ (W_arc @ H_dep + B_arc)
@@ -59,7 +60,8 @@ class EdgeScorer(nn.Module):
     # Hh_Wa_Hd : [batch_size, sentence_length, sentence_length]
 
     Hh_B = self.bias_arc(H_head)
-    # Hh_B : [batch_size, sentence_length, sentence_length]
+    # Hh_B : [batch_size, sentence_length, 1]
+    Hh_B = Hh_B.repeat(1, 1, Hh_Wa_Hd.size(dim=2))
 
     scores = Hh_Wa_Hd + Hh_B
     # scores[i][j] = prob of w[i] being head of w[j]
