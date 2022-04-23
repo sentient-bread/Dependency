@@ -99,6 +99,9 @@ def train_edgescorer(train_path, num_epochs):
 
   postagger = torch.load(POS_MODEL_PATH, map_location=torch.device('cpu'))
   postagger.eval()
+  for param in postagger.parameters(): # Freeze the POS tagger
+      param.requires_grad = False
+
   model = EdgeScorer(100, len(train_dataset.vocab),
                      100, 50,
                      100, 18, postagger,
