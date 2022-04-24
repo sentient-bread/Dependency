@@ -74,6 +74,7 @@ class Dataset(torch.utils.data.Dataset):
           postags = []
           heads = []
 
+    self.length_longest_sequence += 1
     metatokens = [ '<BOS>', '<PAD>', '<UNK>' ]
     for tok in metatokens:
       freqs.update({tok: 1})
@@ -92,8 +93,10 @@ class Dataset(torch.utils.data.Dataset):
       word_indices = [self.index(word) for word in words]
       tag_indices = [self.tags_to_indices[tag] for tag in tags]
       # converts sentence indices to vocabulary indices
-      heads_indices = [word_indices[i] if i != -1 else -1 for i in heads]
-      self.dataset.append((word_indices, tag_indices, heads_indices))
+
+      # heads already contains correct indices, because when <BOS>
+      # was added, 1-based indexing became 0-based, as needed.
+      self.dataset.append((word_indices, tag_indices, heads))
 
   def __init_from_vocab__(self, vocab, words_to_indices, file_path):
     self.vocab = vocab
@@ -144,11 +147,15 @@ class Dataset(torch.utils.data.Dataset):
           postags = []
           heads = []
 
+    self.length_longest_sequence += 1
     for (words, tags, heads) in dataset:
       word_indices = [self.index(word) for word in words]
       tag_indices = [self.tags_to_indices[tag] for tag in tags]
       # converts sentence indices to vocabulary indices
-      heads_indices = [word_indices[i] if i != -1 else -1 for i in heads]
+
+      # heads already contains correct indices, because when <BOS>
+      # was added, 1-based indexing became 0-based, as needed.
+      self.dataset.append((word_indices, tag_indices, heads))
 
       self.dataset.append((word_indices, tag_indices, heads_indices))
 
