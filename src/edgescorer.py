@@ -10,7 +10,7 @@ class EdgeScorer(nn.Module):
   def __init__(self, output_size, vocab_size,
                word_embedding_dimension, hidden_size,
                pos_embedding_dimension, num_pos_tags, pos_tagger,
-               sentence_length, vocab=None, words_to_indices=None):
+               vocab=None, words_to_indices=None):
     nn.Module.__init__(self)
 
     self.vocab = vocab
@@ -29,7 +29,6 @@ class EdgeScorer(nn.Module):
     # *2 because the LSTM is bidirectional
 
     self.weight_arc = nn.Linear(output_size, output_size, bias=False)
-    #self.bias_arc = nn.Linear(output_size, sentence_length, bias=False)
     self.bias_arc = nn.Linear(output_size, 1, bias=False)
     # Treat these as just matrices, not NN layers
     # It's just to make training and mat mult convenient afaiu
@@ -62,12 +61,10 @@ class EdgeScorer(nn.Module):
     Hh_B = self.bias_arc(H_head)
     # Hh_B : [batch_size, sentence_length, 1]
     Hh_B = Hh_B.repeat(1, 1, Hh_Wa_Hd.size(dim=2))
+    # Hh_B : [batch_size, sentence_length, sentence_length]
 
     scores = Hh_Wa_Hd + Hh_B
     # scores[i][j] = prob of w[i] being head of w[j]
-
-    # We want scores[i][j] = prob of w[j] being head of w[i]
-    scores = scores.transpose(1,2)
 
     return scores
 
@@ -75,18 +72,23 @@ class EdgeScorer(nn.Module):
     scores = self.forward(batch)
 
     # Most likely head for each dependent
-    return scores.argmax(dim=2)
+    return scores.argmax(dim=1)
 
 def train_epoch(model, optimizer, loss_fun, dataloader):
+  avg_loss = 0
   for batch in dataloader:
     pred = model(batch[:, 0, :])
     targ = batch[:, 2, :]
     loss = loss_fun(pred, targ)
-    
+
     loss.backward()
     ic(loss)
+    avg_loss += loss
     optimizer.step()
     optimizer.zero_grad()
+
+  avg_loss /= len(dataloader)
+  ic(avg_loss)
 
 def train(model, optimizer, loss_fun, dataset, num_epochs):
     for epoch in range(num_epochs):
@@ -107,7 +109,6 @@ def train_edgescorer(train_path, num_epochs):
   model = EdgeScorer(100, len(train_dataset.vocab),
                      100, 50,
                      100, 18, postagger,
-                     sentence_length=train_dataset.length_longest_sequence,
                      vocab=train_dataset.vocab,
                      words_to_indices=train_dataset.words_to_indices)
 
@@ -116,3 +117,22 @@ def train_edgescorer(train_path, num_epochs):
   loss_fun = torch.nn.CrossEntropyLoss(ignore_index=PAD_DEPENDENCY)
 
   train(model, optimizer, loss_fun, train_dataset, num_epochs)
+
+def test_edgescorer(model, test_path):
+  test_dataset = Dataset(from_vocab=True, file_path=test_path, vocab=model.vocab, words_to_indices=model.words_to_indices)
+  dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE)
+
+  total, matches = 0, 0
+  for batch in dataloader:
+      inp = batch[:,0,:]
+      pred = model.predict(inp)
+      targ = batch[:,2,:]
+      comparison = torch.flatten(torch.stack((model.predict(inp), targ), dim=2),
+                                 start_dim=0, end_dim=1)
+      
+      for pred_head, real_head in comparison:
+          if (real_head == -1): continue
+          total += 1
+          if (pred_head == real_head): matches += 1
+      
+  return matches/total
