@@ -3,7 +3,7 @@ from embedding import MLP
 from data import *
 import torch
 from settings import *
-
+from sklearn import metrics
 
 
 class POSTag(nn.Module):
@@ -140,6 +140,49 @@ def test_model(model, test_file_path):
   average_accuracy = sum_accuracy / total_batches
 
   ic(average_accuracy)
+
+# train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
+
+# train_POS(train_path, 20)
+
+# load_model = torch.load(POS_MODEL_PATH).to(DEVICE)
+
+# ic(load_model.vocab)
+
+# test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
+
+# test_model(load_model, test_file_path)
+
+def all_metrics(model, test_file_path):
+  test_dataset = Dataset(True, vocab=model.vocab, words_to_indices=model.words_to_indices, file_path=test_file_path)
+  # test_dataset initialized with vocabulary taken from loaded model
+
+  dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE)
+
+  tag_dict = {i: tag for tag, i in test_dataset.tags_to_indices.items()}
+
+  pred_all = []
+  gold_all = []
+  for i, batch in enumerate(dataloader):
+    pred = model(batch[:, 0, :])
+    pred = model.predict(pred)
+    pred = torch.flatten(pred)
+    pred = [tag_dict[i.item()] for i in pred]
+    
+    gold = batch[:, 1, :]
+    gold = torch.flatten(gold)
+    gold = [tag_dict[i.item()] for i in gold]
+
+    print(f"Batch {i+1}")
+    print(metrics.classification_report(gold, pred))
+    
+    pred_all += pred
+    gold_all += gold
+
+  print("Overall")
+  print(metrics.classification_report(gold_all, pred_all))
+    
+
 
 # train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
 
