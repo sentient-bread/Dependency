@@ -141,17 +141,6 @@ def test_model(model, test_file_path):
 
   ic(average_accuracy)
 
-# train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
-
-# train_POS(train_path, 20)
-
-# load_model = torch.load(POS_MODEL_PATH).to(DEVICE)
-
-# ic(load_model.vocab)
-
-# test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
-
-# test_model(load_model, test_file_path)
 
 def all_metrics(model, test_file_path):
   test_dataset = Dataset(True, vocab=model.vocab, words_to_indices=model.words_to_indices, file_path=test_file_path)
