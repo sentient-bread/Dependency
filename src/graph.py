@@ -1,6 +1,5 @@
-from regex import W
 from edgescorer import EdgeScorer 
-from embedding import Embedder
+from pos import POSTag
 from copy import deepcopy
 from math import inf
 
@@ -117,9 +116,17 @@ def get_MST(graph, scores):
     return mst
 
 class Parser():
-    def __init__(self):
-        self.edgescorer = EdgeScorer(Embedder("../data/UD_English-Atis/en_atis-ud-train.conllu"),
-                                     100, 150)
+    def __init__(self, from_pretrained=True):
+        if not from_pretrained:
+            train_POS("../data/UD_English-Atis/en_atis-ud-train.conllu", 20)
+            train_edgescorer("../data/UD_English-Atis/en_atis-ud-train.conllu", 35)
+
+        # After training, the models are saved
+        # If from_pretrained is True, then it is assumed
+        # that the saved models use the same vocabulary
+        # and words_to_indices
+        self.pos_tagger = torch.load("../models/pos_model.pth")
+        self.edgescorer = torch.load("../models/edgescorer_model.pth")
 
     def create_graph(self, sentence):
         """
@@ -129,6 +136,15 @@ class Parser():
         scores = self.edgescorer(sentence)
         # Now scores[i][j] = probability that
         # i is the head of j
+
+        pad_index = len(self.edgescorer.vocab) - 2
+        # The number representing <PAD> in the sentence
+
+        remove_index = sentence.tolist().index(pad_index)
+        # The index in the sentence from which padding
+        # has happened .: which has to be ignored
+        scores = scores[:remove_index, :remove_index]
+        # Stripping scores matrix to remove pad-pad dependencies
 
         scores = scores.transpose(0,1).tolist()
         # Now scores[i][j] = probability that
