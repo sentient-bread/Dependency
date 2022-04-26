@@ -140,17 +140,21 @@ class Parser():
         pad_index = len(self.edgescorer.vocab) - 2
         # The number representing <PAD> in the sentence
 
-        remove_index = sentence.tolist().index(pad_index)
-        # The index in the sentence from which padding
-        # has happened .: which has to be ignored
-        scores = scores[:remove_index, :remove_index]
-        # Stripping scores matrix to remove pad-pad dependencies
+        try:
+            remove_index = sentence.tolist().index(pad_index)
+            # The index in the sentence from which padding
+            # has happened .: which has to be ignored
+            scores = scores[:remove_index, :remove_index]
+            # Stripping scores matrix to remove pad-pad dependencies
+        except ValueError: pass
+        # If the sentence has no pad_index
 
         scores = scores.transpose(0,1).tolist()
         # Now scores[i][j] = probability that
         # j is a head of i
 
-        graph = [[]]*(len(sentence))
+        graph = [ [] ]*(len(sentence))
+        # Initialised with [] as a placeholder
 
         for i in range(1, len(sentence)):
             graph[i] = [0] + [j for j in range(1, len(sentence)) if j != i]
