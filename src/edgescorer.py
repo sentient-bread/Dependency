@@ -55,16 +55,22 @@ class EdgeScorer(nn.Module):
     # Following lines are all matrix multiplications
     Wa_Hd = self.weight_arc(H_dep).transpose(1,2)
     # Wa_Hd : [batch_size, output_size, sentence_length]
+    # Wa_Hd = (H_dep (W_arc)^T)^T
+    #       =  W_arc (H_dep)^T
+
     Hh_Wa_Hd = torch.matmul(H_head, Wa_Hd)
     # Hh_Wa_Hd : [batch_size, sentence_length, sentence_length]
+    # Hh_Wa_Hd = H_head W_arc (H_dep)^T
 
     Hh_B = self.bias_arc(H_head)
     # Hh_B : [batch_size, sentence_length, 1]
     Hh_B = Hh_B.repeat(1, 1, Hh_Wa_Hd.size(dim=2))
     # Hh_B : [batch_size, sentence_length, sentence_length]
+    # Hh_B = H_head (B_arc)^T [for all dependents]
 
     scores = Hh_Wa_Hd + Hh_B
     # scores[i][j] = prob of w[i] being head of w[j]
+    # scores = H_head W_arc (H_dep)^T + H_head (B_arc)^T
 
     return scores
 
