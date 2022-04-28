@@ -153,3 +153,126 @@ class Dataset(torch.utils.data.Dataset):
 # for batch in test_dataloader:
 
 #   ic(batch[:, 0, :], batch[:, 0, :].shape)
+
+class DatasetCharacter(torch.utils.data.Dataset):
+
+  """
+  This class is for the specific dataset of the character model
+  """
+
+  def __init__(self,
+              from_character_vocab=False,
+              file_path=None,
+              character_vocab=None,
+              character_to_indices=None):
+
+
+
+    if from_character_vocab:
+      self.character_vocab = character_vocab
+      self.character_to_indices = character_to_indices
+
+    else:
+      self.character_to_indices = {}
+      self.character_vocab = []
+
+    dataset = []
+    self.dataset = []
+
+    character_sequence = ""
+
+    self.length_longest_character_sequence = 0
+
+    character_set = set() # relevant when we are creating the vocabulary
+
+    with open(file_path, "r") as f:
+
+      lines = f.readlines()
+
+      for line in lines:
+
+        len_last_read = len(character_sequence)
+
+        if len_last_read > self.length_longest_character_sequence:
+          self.length_longest_character_sequence = len_last_read
+
+        if (len(line) > 0 and line[0] != "#"):
+          # because we only care about the comment line having sentence
+          continue
+
+        tokens = line.split(" ")
+
+        if tokens[1] == "text":
+          # we care about the lines that start with "# text = "
+          character_sequence = line[8:] # keep everything after "# text = "
+          dataset.append(character_sequence)
+
+        if not from_character_vocab:
+          # we are creating the character vocab
+          for character in character_sequence:
+            character_set.add(character)
+
+      if not from_character_vocab:
+        self.character_vocab = sorted(list(character_set), key=ord)
+        # sort according to unicode because it's nice
+        self.character_vocab.append("<PAD>")
+
+        self.character_to_indices = {character: index for index, character in enumerate(self.character_vocab)}
+        # create a reverse mapping
+
+      # turn all sequences into indices in the dataset
+
+      for sequence in dataset:
+        indices_sequence = self.characterseq_to_indices(sequence)
+        self.dataset.append(indices_sequence)
+
+  def characterseq_to_indices(self, character_sequence):
+
+    return_array = []
+
+    for character in character_sequence:
+      return_array.append(self.character_to_indices[character])
+
+
+    return return_array
+
+  def __len__(self):
+    return len(self.dataset)
+
+  def __getitem__(self, index):
+
+    to_ret = self.dataset[index]
+    seq_len = len(to_ret)
+    to_pad = self.length_longest_character_sequence - seq_len
+
+    to_ret_tensor = torch.tensor(to_ret).to(DEVICE)
+    to_ret_padded = torch.nn.functional.pad(to_ret_tensor,
+                                            (0, to_pad),
+                                            "constant",
+                                            len(self.character_vocab)-1)
+    # basically padded with <PAD> vector
+
+    return to_ret_padded
+
+#Test code 
+
+# dataset = DatasetCharacter(False, file_path='../data/UD_English-Atis/en_atis-ud-train.conllu')
+
+# ic(dataset.character_vocab)
+
+# dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=30)
+
+# for batch in dataloader:
+#   ic(batch.size)
+#   ic(batch)
+
+# dataset_test = DatasetCharacter(True,
+#                                 file_path='../data/UD_English-Atis/en_atis-ud-test.conllu'
+#                                 , character_vocab=dataset.character_vocab,
+#                                 character_to_indices=dataset.character_to_indices)
+
+# dataloader_test = torch.utils.data.DataLoader(dataset_test, shuffle=True, batch_size=30)
+
+# for batch in dataloader_test:
+#   ic(batch.size)
+#   ic(batch)
