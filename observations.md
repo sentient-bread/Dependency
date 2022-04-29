@@ -19,3 +19,10 @@
 * ES trained on 13.2% accurate POS tagger achieves 91.5% accuracy. Replaced with 98.6% accurate POS tagger, achieves 68.1% accuracy. It used bad tags?
 * ES without POS tagger achieves 90.9% accuracy. It's not needed?
 
+# Notes about the character model
+
+- The dataset pads to the left and not the right in this case 
+- This is because of the model architecture that uses the last cell state separately as well
+- This wasn't necessary in the pos model because the model didn't treat the _last_ state with special treatment
+- padding to the right leads to a lot of loss of information in the final hidden state due to dominance of a lot of pad characters towards the end
+- going word by word was considered for the character model, but was rejected on the ground of examples in hindi like empty verbs: "naach rahe hai" we don't want to separate the context of "rahe hai" from "naach"
