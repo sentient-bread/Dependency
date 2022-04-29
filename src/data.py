@@ -1,6 +1,7 @@
 import torch
 from icecream import ic
 from settings import *
+import random
 
 PAD_DEPENDENCY = -1
 # the dependency set will use -1 tokens as a pad
@@ -216,6 +217,7 @@ class DatasetCharacter(torch.utils.data.Dataset):
         self.character_vocab = sorted(list(character_set), key=ord)
         # sort according to unicode because it's nice
         self.character_vocab.append("<PAD>")
+        self.character_vocab.append("<EOS>")
 
         self.character_to_indices = {character: index for index, character in enumerate(self.character_vocab)}
         # create a reverse mapping
@@ -224,6 +226,8 @@ class DatasetCharacter(torch.utils.data.Dataset):
 
       for sequence in dataset:
         indices_sequence = self.characterseq_to_indices(sequence)
+        indices_sequence.append(len(self.character_vocab)-1)
+        # end of sentence added at the end
         self.dataset.append(indices_sequence)
 
   def characterseq_to_indices(self, character_sequence):
@@ -244,13 +248,13 @@ class DatasetCharacter(torch.utils.data.Dataset):
     to_ret = self.dataset[index]
     seq_len = len(to_ret)
     to_pad = self.length_longest_character_sequence - seq_len
-
     to_ret_tensor = torch.tensor(to_ret).to(DEVICE)
     to_ret_padded = torch.nn.functional.pad(to_ret_tensor,
-                                            (0, to_pad),
+                                            (to_pad, 0),
                                             "constant",
-                                            len(self.character_vocab)-1)
-    # basically padded with <PAD> vector
+                                            len(self.character_vocab)-2
+                                            )
+    # basically left padded with <PAD> vector
 
     return to_ret_padded
 
