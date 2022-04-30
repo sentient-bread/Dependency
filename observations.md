@@ -19,3 +19,58 @@
 * ES trained on 13.2% accurate POS tagger achieves 91.5% accuracy. Replaced with 98.6% accurate POS tagger, achieves 68.1% accuracy. It used bad tags?
 * ES without POS tagger achieves 90.9% accuracy. It's not needed?
 
+# POS Tagging training report
+
+- when trained with a hidden size of 50 (therefore 100 due to biLSTM) the model performed with metrics that were better than hidden size 200
+
+- But the paper prescribes 200 (therefore 400), that is what we are currently going for
+
+Results when trained with hidden size of 50 (100)
+
+Overall
+              precision    recall  f1-score   support
+
+         ADJ       0.92      0.97      0.95       220
+         ADP       0.98      1.00      0.99      1434
+         ADV       0.98      0.71      0.82        76
+         AUX       0.99      0.99      0.99       256
+       CCONJ       1.00      0.99      1.00       109
+         DET       1.00      0.99      0.99       512
+        INTJ       1.00      1.00      1.00        36
+        NOUN       0.95      0.99      0.97       995
+        NULL       1.00      1.00      1.00     13344
+         NUM       0.97      0.84      0.90       127
+        PART       0.98      0.96      0.97        56
+        PRON       0.98      1.00      0.99       392
+       PROPN       0.99      0.99      0.99      1738
+        VERB       0.99      0.94      0.96       629
+
+    accuracy                           0.99     19924
+   macro avg       0.98      0.96      0.97     19924
+weighted avg       0.99      0.99      0.99     19924
+
+
+Results when trained with hidden size of 200 (400)
+
+Overall
+              precision    recall  f1-score   support
+
+         ADJ       0.89      0.96      0.93       220
+         ADP       0.99      1.00      0.99      1434
+         ADV       0.94      0.76      0.84        76
+         AUX       0.99      0.98      0.99       256
+       CCONJ       1.00      0.99      1.00       109
+         DET       0.99      0.98      0.99       512
+        INTJ       0.97      1.00      0.99        36
+        NOUN       0.96      0.99      0.97       995
+        NULL       1.00      1.00      1.00     13344
+         NUM       0.96      0.83      0.89       127
+        PART       0.98      0.93      0.95        56
+        PRON       0.98      0.99      0.99       392
+       PROPN       0.99      0.99      0.99      1738
+        VERB       0.99      0.95      0.97       629
+
+    accuracy                           0.99     19924
+   macro avg       0.97      0.95      0.96     19924
+weighted avg       0.99      0.99      0.99     19924
+
