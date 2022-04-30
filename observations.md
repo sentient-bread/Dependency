@@ -19,3 +19,12 @@
 * ES trained on 13.2% accurate POS tagger achieves 91.5% accuracy. Replaced with 98.6% accurate POS tagger, achieves 68.1% accuracy. It used bad tags?
 * ES without POS tagger achieves 90.9% accuracy. It's not needed?
 
+* We're training one LSTM **each** for the EdgeScorer and EdgeLabeller classes,
+  and getting our hidden states that we pass to MLPs internally to each class.
+* This may cause issues because the hidden states that are inputs to each of
+  the four MLPs may not all be the same now. The two for the EdgeScorer and the
+  two for the EdgeLabeller are of course the same for each other, but all four
+  need not be the same.
+* For now, we're assuming that it doesn't matter that the hidden states are not
+  the exact same since these biaffine classifiers are being trained in
+  isolation any way.
