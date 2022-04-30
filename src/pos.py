@@ -21,6 +21,7 @@ class POSTag(nn.Module):
     """
     super().__init__()
 
+    self.num_pos_tags = num_pos_tags
     self.vocab = vocab
     self.words_to_indices = words_to_indices
 
@@ -33,7 +34,7 @@ class POSTag(nn.Module):
     # the multiplied by 2 is because of bilstm
     # the final output will be of hidden_size * 2
 
-    self.linear = nn.Linear(output_size, num_pos_tags, bias=True)
+    self.pos_embedding = nn.Linear(output_size, num_pos_tags, bias=True)
 
   def forward(self, batch):
 
@@ -50,7 +51,7 @@ class POSTag(nn.Module):
     classifier_outputs = self.classifier(lstm_outputs)
     # MLP Classifier
 
-    affine_layer_outputs = self.linear(classifier_outputs)
+    affine_layer_outputs = self.pos_embedding(classifier_outputs)
 
 
     return affine_layer_outputs
@@ -59,6 +60,16 @@ class POSTag(nn.Module):
 
     #affine_layer_output = self.forward(batch)
     return batch.argmax(dim=2)
+
+  def get_pos_embedding(self, batch):
+
+    # accepts a bunch of indices in the pos list
+    one_hots = torch.nn.functional.one_hot(batch, num_classes=self.num_pos_tags).float()
+    # ic(one_hots)
+    ic(one_hots.size())
+    pos_embeddings = self.pos_embedding(one_hots)
+
+    return pos_embeddings
 
 def train_epoch(model, optimizer, loss_fun, dataloader):
 
@@ -97,7 +108,7 @@ def train_POS(train_path, num_epochs):
                 18,
                 len(train_dataset.vocab),
                 100,
-                50,
+                200,
                 18,
                 vocab=train_dataset.vocab,
                 words_to_indices=train_dataset.words_to_indices).to(DEVICE)
@@ -175,7 +186,7 @@ def all_metrics(model, test_file_path):
 
 # train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
 
-# train_POS(train_path, 20)
+# train_POS(train_path, 30)
 
 # load_model = torch.load(POS_MODEL_PATH).to(DEVICE)
 
@@ -184,3 +195,5 @@ def all_metrics(model, test_file_path):
 # test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
 
 # test_model(load_model, test_file_path)
+
+# all_metrics(load_model, test_file_path)
