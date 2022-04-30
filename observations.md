@@ -26,3 +26,4 @@
 - This wasn't necessary in the pos model because the model didn't treat the _last_ state with special treatment
 - padding to the right leads to a lot of loss of information in the final hidden state due to dominance of a lot of pad characters towards the end
 - going word by word was considered for the character model, but was rejected on the ground of examples in hindi like empty verbs: "naach rahe hai" we don't want to separate the context of "rahe hai" from "naach"
+- the character embedding is trained by taking a window 3/4 of length and predicting the next character
