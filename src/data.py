@@ -140,6 +140,8 @@ class Dataset(torch.utils.data.Dataset):
     for i, word in enumerate(self.vocab):
       try:
         weights_matrix[i] = torch.tensor(embedding_list[words_to_indices[word]])
+        # only the embedding_list[] access can give key error
+        # because we are iterating over the vocab
       except KeyError:
         weights_matrix[i] = torch.zeros(100)
 
