@@ -21,6 +21,8 @@ class EdgeLabeller(nn.Module):
       labels=UNIVERSAL_DEPENDENCY_LABELS):
     super().__init__()
 
+    self.pos_tagger = pos_tagger
+
     self.word_embedding_layer = nn.Embedding(vocab_size, word_embedding_dimension)
     self.pos_embedding_layer = nn.Embedding(num_pos_tags, pos_embedding_dimension)
 
@@ -50,7 +52,8 @@ class EdgeLabeller(nn.Module):
     #   [indices for n'th sentence in batch] ]
     # NOTE: Make sure heads_indices handles BOS and padding
 
-    pos_tags_probabilities = self.pos_tagger(batch)
+    pos_tags_probabilities = self.pos_tagger(batch[:, 0, :])
+    # Because the pos tagger predicts the probability of each pos tag on the words in the batch
     pos_tags = self.pos_tagger.predict(pos_tags_probabilities)
     pos_embedded = self.pos_embedding_layer(pos_tags)
 
@@ -66,8 +69,11 @@ class EdgeLabeller(nn.Module):
     # heads and the dependents instead of the words and themselves.
     H_head_raw = self.head_encoder(lstm_outputs)
 
-    # The dimension in which we index will be along each sentence in the batch
-    H_head = torch.gather(H_head_raw, heads_indices, dim=1)
+    # The dimension in which we index will be the second dimension (1), i.e.
+    # along each sentence in the batch.
+    ic(H_head_raw.shape)
+    ic(heads_indices.shape)
+    H_head = torch.gather(H_head_raw, 1, heads_indices)
 
     # The first term intuitively relates to the probability of a specific label
     # given the interaction between *both* the head and the label. This is the
