@@ -2,7 +2,7 @@ import torch
 from icecream import ic
 from settings import *
 
-PAD_DEPENDENCY = -1
+PAD_DEPENDENCY = 0
 # the dependency set will use -1 tokens as a pad
 # The reason is that -1 refers to the dummy head
 
@@ -70,7 +70,7 @@ class Dataset(torch.utils.data.Dataset):
         else:
           words.insert(0, '<BOS>')
           postags.insert(0, 'NULL')
-          heads.insert(0, -1)
+          heads.insert(0, 0)
           relations.insert(0, "<null>")
           # This -1 does NOT mean that the head of <BOS> is the last word
           # in the sentence. It means that the head of <BOS> is itself.

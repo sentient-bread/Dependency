@@ -115,7 +115,7 @@ class EdgeLabeller(nn.Module):
     # W^(rel) matrix in the paper.
 
     # The dimension we concatenate along are the embeddings themselves.
-    Wr_Hr_Hd = self.either_weight_rel(torch.cat(H_head, H_dep, dim=2))
+    Wr_Hr_Hd = self.either_weight_rel(torch.cat((H_head, H_dep), dim=2))
     ic(Wr_Hr_Hd.shape)
 
     scores = Hh_Ur_Hd + Wr_Hr_Hd
