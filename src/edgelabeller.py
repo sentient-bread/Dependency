@@ -73,7 +73,36 @@ class EdgeLabeller(nn.Module):
     # along each sentence in the batch.
     ic(H_head_raw.shape)
     ic(heads_indices.shape)
-    H_head = torch.gather(H_head_raw, 1, heads_indices)
+
+    # Heads indices has to be transformed into the correct dimensions for the torch.gather
+    # function, which will do the rearrangement we need.
+    # Initially it has a dimension of [batch_size, max_sentence_length].
+
+    # We need to transform it into [batch_size, max_sentence_length, embedding_size],
+    # because torch.gather requires that the dimensions of the indices match
+    # the dimensions of the input tensor.
+
+    # For a 3D-tensor, torch.gather will work in the following way, since dim=1:
+    #     out[i][j][k] = input[i][index[i][j][k]][k]
+    # We want that in the output, the first dimension is unchanged, since it is the sentence
+    # within the batch.
+    # The second dimension is the index of the word within the sentence, and this is what
+    # we need to rearrange.
+    # We retreive this using index[i][j][k] = heads_indices[i][j]
+    # This means that the third dimension in our index tensor doesn't actually matter,
+    # but for dimensionality reasons we need it. So we replace each individual index,
+    # with a vector of the same size as the embedding dimension, having all the same
+    # value, i.e. the desired index.
+
+    heads_indices_expanded = heads_indices.unsqueeze(2).expand(-1, -1, 100)
+    # We unsqueeze along the 3rd dimension to turn each individual index into
+    # a singleton vector, and then expand it to the same size as the embedding.
+    # the first two parameters are -1 because we do not want to affect the size of
+    # the first two dimensions
+
+    ic(heads_indices_expanded.shape)
+    # FIXME: (-1) indices out of bounds
+    H_head = torch.gather(H_head_raw, 1, heads_indices_expanded)
 
     # The first term intuitively relates to the probability of a specific label
     # given the interaction between *both* the head and the label. This is the
