@@ -32,6 +32,7 @@ class Dataset(torch.utils.data.Dataset):
     words = []
     postags = []
     heads = []
+    relations = []
 
     self.length_longest_sequence = 0
 
@@ -55,10 +56,11 @@ class Dataset(torch.utils.data.Dataset):
         if (len(line) > 0):
           columns = line.split('\t')
 
-          WORD_INDEX, POS_INDEX, HEAD_INDEX = 1, 3, 6
+          WORD_INDEX, POS_INDEX, HEAD_INDEX, RELATION_INDEX = 1, 3, 6, 7
           words.append(columns[WORD_INDEX])
           postags.append(columns[POS_INDEX])
           heads.append(int(columns[HEAD_INDEX]))
+          relations.append(columns[RELATION_INDEX])
 
           if not from_vocab:
             try: freqs[columns[1]] += 1
@@ -69,15 +71,17 @@ class Dataset(torch.utils.data.Dataset):
           words.insert(0, '<BOS>')
           postags.insert(0, 'NULL')
           heads.insert(0, -1)
+          relations.insert(0, "<null>")
           # This -1 does NOT mean that the head of <BOS> is the last word
           # in the sentence. It means that the head of <BOS> is itself.
 
-          dataset.append((words, postags, heads))
+          dataset.append((words, postags, heads, relations))
           if not from_vocab:
             self.vocab += words
           words = []
           postags = []
           heads = []
+          relations = []
 
     self.length_longest_sequence += 1
 
@@ -96,14 +100,15 @@ class Dataset(torch.utils.data.Dataset):
       self.freqs = freqs
       self.words_to_indices = {word: index for index, word in enumerate(self.vocab)}
 
-    for (words, tags, heads) in dataset:
+    for (words, tags, heads, relations) in dataset:
       word_indices = [self.index(word) for word in words]
       tag_indices = [self.tags_to_indices[tag] for tag in tags]
+      relation_indices = [RELATIONS_TO_INDICES[relation] for relation in relations]
       # converts sentence indices to vocabulary indices
 
       # heads already contains correct indices, because when <BOS>
       # was added, 1-based indexing became 0-based, as needed.
-      self.dataset.append((word_indices, tag_indices, heads))
+      self.dataset.append((word_indices, tag_indices, heads, relation_indices))
 
 
   def index(self, word):
@@ -126,6 +131,7 @@ class Dataset(torch.utils.data.Dataset):
     index_of_sentence = 0
     index_of_pos_tags = 1
     index_of_tree_info = 2
+    index_of_relations = 3
 
     to_ret_padded[index_of_sentence] = torch.nn.functional.pad(
                                   to_ret_tensor[index_of_sentence],
@@ -144,6 +150,13 @@ class Dataset(torch.utils.data.Dataset):
                                               "constant",
                                               PAD_DEPENDENCY,
     )
+
+    to_ret_padded[index_of_relations] = torch.nn.functional.pad(to_ret_tensor[index_of_relations],
+                                              (0, amount_to_pad),
+                                              "constant",
+                                              RELATIONS_TO_INDICES["<null>"],
+    )
+
 
     return to_ret_padded
 

@@ -3,13 +3,10 @@ DEVICE = "cpu"
 BATCH_SIZE = 100
 POS_MODEL_PATH = "../models/pos_model.pth"
 EDGESCORER_MODEL_PATH = "../models/edgescorer_model.pth"
+EDGELABELLER_MODEL_PATH = "../models/edgelabeller_model.pth"
 
-
-# universal dependency labels
 UNIVERSAL_DEPENDENCY_LABELS = [
-
-
-    "root",
+    "<null>", # --
     "acl",
     "acl:relcl",
     "advcl",
@@ -39,6 +36,7 @@ UNIVERSAL_DEPENDENCY_LABELS = [
     "det:numgov",
     "det:nummod",
     "det:poss",
+    "det:predet", # --
     "discourse",
     "dislocated",
     "expl",
@@ -70,9 +68,9 @@ UNIVERSAL_DEPENDENCY_LABELS = [
     "parataxis",
     "punct",
     "reparandum",
+    "root",
     "vocative",
     "xcomp",
-
 ]
 
 RELATIONS_TO_INDICES = {
