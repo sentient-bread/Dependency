@@ -21,8 +21,10 @@ class POSTag(nn.Module):
     """
     super().__init__()
 
+    self.num_pos_tags = num_pos_tags
     self.vocab = vocab
     self.words_to_indices = words_to_indices
+    self.output_size = output_size
 
     self.embedding_layer = nn.Embedding(vocab_size, embedding_dimension)
     # may be pretrained
@@ -33,7 +35,7 @@ class POSTag(nn.Module):
     # the multiplied by 2 is because of bilstm
     # the final output will be of hidden_size * 2
 
-    self.linear = nn.Linear(output_size, num_pos_tags, bias=True)
+    self.w_layer = nn.Linear(output_size, num_pos_tags, bias=True)
 
   def forward(self, batch):
 
@@ -49,8 +51,7 @@ class POSTag(nn.Module):
 
     classifier_outputs = self.classifier(lstm_outputs)
     # MLP Classifier
-
-    affine_layer_outputs = self.linear(classifier_outputs)
+    affine_layer_outputs = self.w_layer(classifier_outputs)
 
 
     return affine_layer_outputs
@@ -59,6 +60,13 @@ class POSTag(nn.Module):
 
     #affine_layer_output = self.forward(batch)
     return batch.argmax(dim=2)
+
+  def get_W_transpose_matrix(self):
+
+    w_transpose = self.w_layer.state_dict()['weight']
+    return w_transpose
+
+
 
 def train_epoch(model, optimizer, loss_fun, dataloader):
 
@@ -94,10 +102,10 @@ def train_POS(train_path, num_epochs):
 
 
   model = POSTag(
-                18,
+                100,
                 len(train_dataset.vocab),
                 100,
-                50,
+                200,
                 18,
                 vocab=train_dataset.vocab,
                 words_to_indices=train_dataset.words_to_indices).to(DEVICE)
@@ -133,7 +141,9 @@ def test_model(model, test_file_path):
           accurate_tokens += 1
         total_tokens += 1
     accuracy = accurate_tokens / total_tokens
-
+    # embeddings = model.get_pos_embedding(batch[:, 1, :])
+    # model.output_size = 100
+    # matrix = model.get_W_transpose_matrix()
     sum_accuracy += accuracy
     total_batches += 1
 
@@ -177,10 +187,12 @@ def all_metrics(model, test_file_path):
 
 # train_POS(train_path, 20)
 
-# load_model = torch.load(POS_MODEL_PATH).to(DEVICE)
+load_model = torch.load(POS_MODEL_PATH).to(DEVICE)
 
 # ic(load_model.vocab)
 
-# test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
+test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
 
-# test_model(load_model, test_file_path)
+test_model(load_model, test_file_path)
+
+all_metrics(load_model, test_file_path)
