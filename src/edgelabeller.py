@@ -52,7 +52,7 @@ class EdgeLabeller(nn.Module):
     #   [indices for n'th sentence in batch] ]
     # NOTE: Make sure heads_indices handles BOS and padding
 
-    pos_tags_probabilities = self.pos_tagger(batch[:, 0, :])
+    pos_tags_probabilities = self.pos_tagger(batch[:, WORDS, :])
     # Because the pos tagger predicts the probability of each pos tag on the words in the batch
     pos_tags = self.pos_tagger.predict(pos_tags_probabilities)
     pos_embedded = self.pos_embedding_layer(pos_tags)
@@ -101,12 +101,12 @@ class EdgeLabeller(nn.Module):
     # the first two dimensions
 
     ic(heads_indices_expanded.shape)
-    # FIXME: (-1) indices out of bounds
     H_head = torch.gather(H_head_raw, 1, heads_indices_expanded)
 
     # The first term intuitively relates to the probability of a specific label
     # given the interaction between *both* the head and the label. This is the
     # U^(rel) matrix in the paper.
+    ic(self.both_weight_rel.state_dict()["weight"].shape)
     Hh_Ur_Hd = self.both_weight_rel(H_head, H_dep)
     ic(Hh_Ur_Hd.shape)
 
