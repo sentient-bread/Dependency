@@ -7,16 +7,13 @@ CHARACTER_LSTM_LAYERS = 1
 
 class CharacterModel(nn.Module):
 
-    def __init__(self, embedding_size, input_size, hidden_size, character_level_embedding, vocab_size, max_sequence_length, character_vocab=None, character_to_indices=None):
+    def __init__(self, embedding_size, hidden_size, character_level_embedding, vocab_size, character_vocab=None, character_to_indices=None):
         super().__init__()
         self.embedding_size = embedding_size
-        self.input_size = input_size
         self.vocab_size = vocab_size
         self.character_vocab = character_vocab
         self.character_to_indices = character_to_indices
         self.hidden_size = hidden_size
-        self.max_seq_length = max_sequence_length
-        self.window_size = int(self.max_seq_length * (0.5))
         self.character_level_embedding = character_level_embedding
 
         self.embedding_layer = nn.Embedding(vocab_size, embedding_size)
