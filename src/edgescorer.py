@@ -10,6 +10,7 @@ class EdgeScorer(nn.Module):
   def __init__(self, output_size, vocab_size,
                word_embedding_dimension, hidden_size,
                pos_embedding_dimension, num_pos_tags, pos_tagger,
+               common_lstm,
                vocab=None, words_to_indices=None):
     nn.Module.__init__(self)
 
@@ -34,18 +35,7 @@ class EdgeScorer(nn.Module):
     # It's just to make training and mat mult convenient afaiu
     # Probabilities = H_head @ (W_arc @ H_dep + B_arc)
 
-  def forward(self, batch):
-    words_embedded = self.word_embedding_layer(batch)
-
-    pos_tags_probabilities = self.pos_tagger(batch)
-    pos_tags = self.pos_tagger.predict(pos_tags_probabilities)
-    pos_embedded = self.pos_embedding_layer(pos_tags)
-
-    lstm_inputs = torch.cat((words_embedded, pos_embedded), dim=2)
-    # Concatenate each word's embedding to its POS tag embedding
-
-    lstm_outputs, (last_hidden_state, last_cell_state) = self.lstm(lstm_inputs)
-
+  def hidden_states_treatment(self, lstm_outputs, last_hidden_state, last_cell_state):
     H_head = self.head_encoder(lstm_outputs)
     H_dep = self.dep_encoder(lstm_outputs)
     # Head and dependent representations for all words
@@ -73,6 +63,20 @@ class EdgeScorer(nn.Module):
     # scores = H_head W_arc (H_dep)^T + H_head (B_arc)^T
 
     return scores
+
+  def forward(self, batch):
+    words_embedded = self.word_embedding_layer(batch)
+
+    pos_tags_probabilities = self.pos_tagger(batch)
+    pos_tags = self.pos_tagger.predict(pos_tags_probabilities)
+    pos_embedded = self.pos_embedding_layer(pos_tags)
+
+    lstm_inputs = torch.cat((words_embedded, pos_embedded), dim=2)
+    # Concatenate each word's embedding to its POS tag embedding
+
+    lstm_outputs, (last_hidden_state, last_cell_state) = self.lstm(lstm_inputs)
+
+    return self.hidden_states_treatment(lstm_outputs, last_hidden_state, last_cell_state)
 
   def predict(self, batch):
     scores = self.forward(batch)

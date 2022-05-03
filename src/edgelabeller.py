@@ -15,6 +15,7 @@ class EdgeLabeller(nn.Module):
       pos_embedding_dimension,
       num_pos_tags,
       pos_tagger,
+      common_lstm,
       vocab=None,
       words_to_indices=None,
       relations_to_indices=RELATIONS_TO_INDICES,
@@ -38,29 +39,7 @@ class EdgeLabeller(nn.Module):
     # The W^(rel) matrix in the original paper
     # The bias layer is encapsulated in the second matrix
 
-  def forward(self, batch):
-    # Assuming that the batch has three lists: words, pos, heads
-    WORDS, POS, HEADS = 0, 1, 2
-    ic(batch)
-
-    words_embedded = self.word_embedding_layer(batch[:, WORDS, :])
-    heads_indices = torch.tensor(batch[:, HEADS, :]).to(DEVICE)
-    # Heads indices must be of the form
-    # [ [indices for first sentence in batch]
-    #   [indices for second sentence in batch]
-    #                ...
-    #   [indices for n'th sentence in batch] ]
-    # NOTE: Make sure heads_indices handles BOS and padding
-
-    pos_tags_probabilities = self.pos_tagger(batch[:, WORDS, :])
-    # Because the pos tagger predicts the probability of each pos tag on the words in the batch
-    pos_tags = self.pos_tagger.predict(pos_tags_probabilities)
-    pos_embedded = self.pos_embedding_layer(pos_tags)
-
-    lstm_inputs = torch.cat((words_embedded, pos_embedded), dim=2)
-    # Concatenate each word's embedding to its POS tag embedding
-
-    lstm_outputs, (last_hidden_state, last_cell_state) = self.lstm(lstm_inputs)
+  def hidden_states_treatment(self, lstm_outputs, last_hidden_state, last_cell_state):
 
     H_dep = self.dep_encoder(lstm_outputs)
 
@@ -121,6 +100,32 @@ class EdgeLabeller(nn.Module):
     scores = Hh_Ur_Hd + Wr_Hr_Hd
     ic(scores.shape)
     return scores
+
+  def forward(self, batch):
+    # Assuming that the batch has three lists: words, pos, heads
+    WORDS, POS, HEADS = 0, 1, 2
+    ic(batch)
+
+    words_embedded = self.word_embedding_layer(batch[:, WORDS, :])
+    heads_indices = torch.tensor(batch[:, HEADS, :]).to(DEVICE)
+    # Heads indices must be of the form
+    # [ [indices for first sentence in batch]
+    #   [indices for second sentence in batch]
+    #                ...
+    #   [indices for n'th sentence in batch] ]
+    # NOTE: Make sure heads_indices handles BOS and padding
+
+    pos_tags_probabilities = self.pos_tagger(batch[:, WORDS, :])
+    # Because the pos tagger predicts the probability of each pos tag on the words in the batch
+    pos_tags = self.pos_tagger.predict(pos_tags_probabilities)
+    pos_embedded = self.pos_embedding_layer(pos_tags)
+
+    lstm_inputs = torch.cat((words_embedded, pos_embedded), dim=2)
+    # Concatenate each word's embedding to its POS tag embedding
+
+    lstm_outputs, (last_hidden_state, last_cell_state) = self.lstm(lstm_inputs)
+
+    return self.hidden_states_treatment(lstm_outputs, last_hidden_state, last_cell_state)
 
   def predict(self, batch):
     scores = self.forward(batch)
