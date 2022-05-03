@@ -1,6 +1,7 @@
 import torch
 from icecream import ic
 from settings import *
+import numpy
 
 PAD_DEPENDENCY = 0
 # the dependency set will use -1 tokens as a pad
@@ -110,6 +111,47 @@ class Dataset(torch.utils.data.Dataset):
       # was added, 1-based indexing became 0-based, as needed.
       self.dataset.append((word_indices, tag_indices, heads, relation_indices))
 
+  def load_pretrained_embeddings(self, embedding_file_path):
+
+    """
+    Loads all embeddings from a file
+    for all words in the vocabulary, it gets the embedding and puts them in a tensor
+    whenever there is a word in the vocabulary that isn't in the embeddings on file
+    we just put all 0's
+    """
+    words = []
+    words_to_indices = {}
+
+    embedding_list = []
+
+    index = 0
+
+    # currently assumed that word embeddings are 100 dimensional
+    with open(embedding_file_path, "rb") as embedding_file:
+      for l in embedding_file:
+        line = l.decode().split()
+        word = line[0]
+        words.append(word)
+
+        words_to_indices[word] = index
+        index += 1
+
+        vector = numpy.array(line[1:]).astype(numpy.float)
+        embedding_list.append(vector)
+
+
+    weights_matrix = torch.zeros([len(self.vocab), 100])
+
+    for i, word in enumerate(self.vocab):
+      try:
+        weights_matrix[i] = torch.tensor(embedding_list[words_to_indices[word]])
+        # only the embedding_list[] access can give key error
+        # because we are iterating over the vocab
+      except KeyError:
+        weights_matrix[i] = torch.zeros(100)
+
+    self.pretrained_embedding_weights = weights_matrix
+
 
   def index(self, word):
     try: idx = self.words_to_indices[word]
@@ -160,9 +202,12 @@ class Dataset(torch.utils.data.Dataset):
 
     return to_ret_padded
 
-# test_dataset = Dataset(trainfile='../data/UD_English-Atis/en_atis-ud-test.conllu')
+# test_dataset = Dataset(False, file_path='../data/UD_English-Atis/en_atis-ud-test.conllu')
 # test_dataloader = torch.utils.data.DataLoader(test_dataset, shuffle=True, batch_size=BATCH_SIZE)
-
+# embedding_file_path = "../embeddings/glove.6B.100d.txt"
+# test_dataset.load_pretrained_embeddings(embedding_file_path)
+# ic(len(test_dataset.vocab))
+# ic(test_dataset.pretrained_embedding_weights.shape)
 # for batch in test_dataloader:
 
 #   ic(batch[:, 0, :], batch[:, 0, :].shape)
