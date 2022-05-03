@@ -39,12 +39,8 @@ class EdgeLabeller(nn.Module):
     # The bias layer is encapsulated in the second matrix
 
   def forward(self, batch):
-    # Assuming that the batch has three lists: words, pos, heads
-    WORDS, POS, HEADS = 0, 1, 2
-    ic(batch)
-
-    words_embedded = self.word_embedding_layer(batch[:, WORDS, :])
-    heads_indices = torch.tensor(batch[:, HEADS, :]).to(DEVICE)
+    words_embedded = self.word_embedding_layer(batch[:, WORDS_IN_BATCH, :])
+    heads_indices = torch.tensor(batch[:, HEADS_IN_BATCH, :]).to(DEVICE)
     # Heads indices must be of the form
     # [ [indices for first sentence in batch]
     #   [indices for second sentence in batch]
@@ -52,7 +48,7 @@ class EdgeLabeller(nn.Module):
     #   [indices for n'th sentence in batch] ]
     # NOTE: Make sure heads_indices handles BOS and padding
 
-    pos_tags_probabilities = self.pos_tagger(batch[:, WORDS, :])
+    pos_tags_probabilities = self.pos_tagger(batch[:, WORDS_IN_BATCH, :])
     # Because the pos tagger predicts the probability of each pos tag on the words in the batch
     pos_tags = self.pos_tagger.predict(pos_tags_probabilities)
     pos_embedded = self.pos_embedding_layer(pos_tags)

@@ -35,9 +35,9 @@ class EdgeScorer(nn.Module):
     # Probabilities = H_head @ (W_arc @ H_dep + B_arc)
 
   def forward(self, batch):
-    words_embedded = self.word_embedding_layer(batch)
+    words_embedded = self.word_embedding_layer(batch[:, WORDS_IN_BATCH, :])
 
-    pos_tags_probabilities = self.pos_tagger(batch)
+    pos_tags_probabilities = self.pos_tagger(batch[:, WORDS_IN_BATCH, :])
     pos_tags = self.pos_tagger.predict(pos_tags_probabilities)
     pos_embedded = self.pos_embedding_layer(pos_tags)
 
@@ -83,8 +83,8 @@ class EdgeScorer(nn.Module):
 def train_epoch(model, optimizer, loss_fun, dataloader):
   avg_loss = 0
   for batch in dataloader:
-    pred = model(batch[:, 0, :])
-    targ = batch[:, 2, :]
+    pred = model(batch)
+    targ = batch[:, HEADS_IN_BATCH, :]
     loss = loss_fun(pred, targ)
 
     loss.backward()
@@ -130,15 +130,15 @@ def test_edgescorer(model, test_path):
 
   total, matches = 0, 0
   for batch in dataloader:
-      inp = batch[:,0,:]
+      inp = batch[:, WORDS_IN_BATCH, :]
       pred = model.predict(inp)
-      targ = batch[:,2,:]
+      targ = batch[:, HEADS_IN_BATCH, :]
       comparison = torch.flatten(torch.stack((model.predict(inp), targ), dim=2),
                                  start_dim=0, end_dim=1)
-      
+
       for pred_head, real_head in comparison:
-          if (real_head == -1): continue
+          if (real_head == 0): continue
           total += 1
           if (pred_head == real_head): matches += 1
-      
+
   return matches/total
