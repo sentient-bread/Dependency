@@ -93,117 +93,30 @@ class CharacterModel(nn.Module):
 
 
 
+# def train_character_model(train_path, num_epochs):
+
+#     # train_dataset = DatasetCharacter(False, file_path=train_path)
+#     train_dataset = Dataset(False, file_path=train_path, character_dataset=True)
 
 
-def train_epoch(model, optimizer, loss_fun, dataloader):
+#     dataloader = torch.utils.data.DataLoader(train_dataset, shuffle=True, batch_size=69)
 
-    for batch in dataloader:
-        left = 0
-        right = model.window_size
-        ic(batch.size())
-        counter = 0
-        loss_total = 0
-        perplexity_total = 1
-        while right < batch.size()[1]-1:
-            window = batch[:, left:right]
-            out = model(window)
-            logits = model.layer_for_distribution(out)
-            # ic(logits.size())
-            probability = model.softmax_layer(logits)
-            # ic(probability)
-            loss = loss_fun(logits, batch[:, right])
-            loss_total += loss.item()
-            perplexity_total *= torch.exp(loss).item()
-        # assuming that the loss function is cross entropy loss
-        # out is a set embeddings making sentences that make batches
-        # on the comparison we just give it the pos tags
+#     model = CharacterModel(100, 
+#                             len(train_dataset.character_dataset.character_vocab), 
+#                             400, 
+#                             100, 
+#                             len(train_dataset.character_dataset.character_vocab), 
+#                             train_dataset.character_dataset.length_longest_word,
+#                             character_vocab=train_dataset.character_dataset.character_vocab,
+#                             character_to_indices=train_dataset.character_dataset.character_to_indices).to(DEVICE)
+#     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-            loss.backward()
-            # ic(loss)
-            optimizer.step()
-            optimizer.zero_grad()
-            left += 1
-            right += 1
-            counter += 1
-        ic(loss_total / counter)
-        ic(perplexity_total ** (1/counter))
+#     loss_fun = torch.nn.CrossEntropyLoss()
 
-# train_epoch(model, optimizer, loss_fun, dataloader)
-
-def train(model, optimizer, loss_fun, dataset, num_epochs):
-
-    for epoch in range(num_epochs):
-        print(f"{epoch+1}")
-        dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=BATCH_SIZE)
-        train_epoch(model, optimizer, loss_fun, dataloader)
-        print("-------")
-        torch.save(model, CHARACTER_MODEL_PATH)
-
-def train_character_model(train_path, num_epochs):
-
-    train_dataset = DatasetCharacter(False, file_path=train_path)
+#     for batch in dataloader:
+#         model(batch[1])
 
 
-    dataloader = torch.utils.data.DataLoader(train_dataset, shuffle=True, batch_size=69)
-
-    model = CharacterModel(100, 
-                            len(train_dataset.character_vocab), 
-                            400, 
-                            100, 
-                            len(train_dataset.character_vocab), 
-                            train_dataset.length_longest_character_sequence,
-                            character_vocab=train_dataset.character_vocab,
-                            character_to_indices=train_dataset.character_to_indices).to(DEVICE)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-
-    loss_fun = torch.nn.CrossEntropyLoss()
-
-    for batch in dataloader:
-        model(batch)
-
-    #train(model, optimizer, loss_fun, train_dataset, num_epochs)
-  # train_epoch(model, None, None, test_dataloader)
-
-train_character_model('../data/UD_English-Atis/en_atis-ud-train.conllu', 20)
-
-def test_character_model(model, test_path):
-
-    test_dataset = DatasetCharacter(True, file_path=test_path,
-                                    character_vocab=model.character_vocab
-                                    , character_to_indices=model.character_to_indices)
-
-
-    dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=100)
-    loss_fun = nn.CrossEntropyLoss()
-    for batch in dataloader:
-        left = 0
-        right = model.window_size
-        ic(batch.size())
-        counter = 0
-        loss_total = 0
-        perplexity_total = 1
-        ic(right)
-        while right < batch.size()[1]-1:
-            window = batch[:, left:right]
-            out = model(window)
-            logits = model.layer_for_distribution(out)
-            # ic(logits.size())
-            probability = model.softmax_layer(logits)
-            # ic(probability)
-            loss = loss_fun(logits, batch[:, right])
-            loss_total += loss.item()
-
-        # assuming that the loss function is cross entropy loss
-        # out is a set embeddings making sentences that make batches
-        # on the comparison we just give it the pos tags
-
-            left += 1
-            right += 1
-            counter += 1
-
-        avg_loss = loss_total / counter
-        ic(avg_loss)
-        ic(torch.exp(torch.tensor(avg_loss))) #perplexity
 
 # model_load = torch.load(CHARACTER_MODEL_PATH).to(DEVICE)
 # test_character_model(model_load, '../data/UD_English-Atis/en_atis-ud-train.conllu')
