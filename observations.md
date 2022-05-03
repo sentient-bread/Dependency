@@ -21,9 +21,72 @@
 
 # Notes about the character model
 
-- The dataset pads to the left and not the right in this case 
-- This is because of the model architecture that uses the last cell state separately as well
-- This wasn't necessary in the pos model because the model didn't treat the _last_ state with special treatment
-- padding to the right leads to a lot of loss of information in the final hidden state due to dominance of a lot of pad characters towards the end
-- going word by word was considered for the character model, but was rejected on the ground of examples in hindi like empty verbs: "naach rahe hai" we don't want to separate the context of "rahe hai" from "naach"
-- the character embedding is trained by taking a window 3/4 of length and predicting the next character
+- Each word is represented as a list of characters and is padded to the right for now 
+- the lstm of the character model goes word by word. We feel that this is a problem for examples in hindi like empty verbs: "naach rahe hai" we don't want to separate the context of "rahe hai" from "naach". But the language tokenizes this morphemic information and this could have been covered by the character level model.
+
+* We're training one LSTM **each** for the EdgeScorer and EdgeLabeller classes,
+  and getting our hidden states that we pass to MLPs internally to each class.
+* This may cause issues because the hidden states that are inputs to each of
+  the four MLPs may not all be the same now. The two for the EdgeScorer and the
+  two for the EdgeLabeller are of course the same for each other, but all four
+  need not be the same.
+* For now, we're assuming that it doesn't matter that the hidden states are not
+  the exact same since these biaffine classifiers are being trained in
+  isolation any way.
+
+# POS Tagging training report
+
+- when trained with a hidden size of 50 (therefore 100 due to biLSTM) the model performed with metrics that were better than hidden size 200
+
+- But the paper prescribes 200 (therefore 400), that is what we are currently going for
+
+Results when trained with hidden size of 50 (100)
+
+Overall
+              precision    recall  f1-score   support
+
+         ADJ       0.92      0.97      0.95       220
+         ADP       0.98      1.00      0.99      1434
+         ADV       0.98      0.71      0.82        76
+         AUX       0.99      0.99      0.99       256
+       CCONJ       1.00      0.99      1.00       109
+         DET       1.00      0.99      0.99       512
+        INTJ       1.00      1.00      1.00        36
+        NOUN       0.95      0.99      0.97       995
+        NULL       1.00      1.00      1.00     13344
+         NUM       0.97      0.84      0.90       127
+        PART       0.98      0.96      0.97        56
+        PRON       0.98      1.00      0.99       392
+       PROPN       0.99      0.99      0.99      1738
+        VERB       0.99      0.94      0.96       629
+
+    accuracy                           0.99     19924
+   macro avg       0.98      0.96      0.97     19924
+weighted avg       0.99      0.99      0.99     19924
+
+
+Results when trained with hidden size of 200 (400)
+
+Overall
+              precision    recall  f1-score   support
+
+         ADJ       0.89      0.96      0.93       220
+         ADP       0.99      1.00      0.99      1434
+         ADV       0.94      0.76      0.84        76
+         AUX       0.99      0.98      0.99       256
+       CCONJ       1.00      0.99      1.00       109
+         DET       0.99      0.98      0.99       512
+        INTJ       0.97      1.00      0.99        36
+        NOUN       0.96      0.99      0.97       995
+        NULL       1.00      1.00      1.00     13344
+         NUM       0.96      0.83      0.89       127
+        PART       0.98      0.93      0.95        56
+        PRON       0.98      0.99      0.99       392
+       PROPN       0.99      0.99      0.99      1738
+        VERB       0.99      0.95      0.97       629
+
+    accuracy                           0.99     19924
+   macro avg       0.97      0.95      0.96     19924
+weighted avg       0.99      0.99      0.99     19924
+
+
