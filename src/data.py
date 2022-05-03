@@ -1,10 +1,7 @@
 import torch
 from icecream import ic
 from settings import *
-<<<<<<< HEAD
 import random
-=======
->>>>>>> origin/main
 import numpy
 
 PAD_DEPENDENCY = 0
