@@ -26,11 +26,16 @@ class Parser(nn.Module):
                 character_vocab=None,
                 character_to_indices=None,
                 vocab=None,
-                word_to_indices=None,
+                words_to_indices=None,
                 relationships_to_indices=RELATIONS_TO_INDICES,
                 labels=UNIVERSAL_DEPENDENCY_LABELS,
                 ):
         super().__init__()
+
+        self.vocab = vocab
+        self.words_to_indices = words_to_indices
+        self.vocab_size = vocab_size
+
         self.pos_tagger: POSTag = pos_tagger
         # get the separately trained pos tagger as a state variable
 
@@ -56,7 +61,7 @@ class Parser(nn.Module):
                                     pos_embedding_dimension, num_pos_tags,
                                     pos_tagger, self.common_lstm, self.pos_embeddings,
                                     vocab,
-                                    word_to_indices)
+                                    words_to_indices)
 
         self.edge_labeller = EdgeLabeller(labeller_state, vocab_size,
                                             word_embedding_dimension, hidden_size,
@@ -65,7 +70,7 @@ class Parser(nn.Module):
                                             pos_tagger,
                                             self.common_lstm,
                                             vocab,
-                                            word_to_indices,
+                                            words_to_indices,
                                             RELATIONS_TO_INDICES,
                                             UNIVERSAL_DEPENDENCY_LABELS)
 
@@ -96,17 +101,22 @@ class Parser(nn.Module):
             pos_predictions = self.pos_tagger.predict(pos_distributions)
             pos_embeddings = self.pos_embeddings(pos_predictions)
 
-            heads_indices = self.edge_scorer.predict(word_level_batch[:, WORDS, :])
 
         lstm_inputs = torch.cat((final_embeddings, pos_embeddings), dim=2)
 
         lstm_outputs, (last_hidden_state, last_cell_state) = self.common_lstm(lstm_inputs)
 
 
-        edge_scorer = self.edge_scorer.hidden_states_treatment(lstm_outputs, last_hidden_state, last_cell_state)
+        edge_scores = self.edge_scorer.hidden_states_treatment(lstm_outputs, last_hidden_state, last_cell_state)
+
+        if train:
+            heads_indices = word_level_batch[:, HEADS, :]
+        else:
+            heads_indices = edge_scores.argmax(dim=1)
+
         edge_labels = self.edge_labeller.hidden_states_treatment(lstm_outputs, last_hidden_state, last_cell_state, heads_indices)
 
-        return (edge_scorer, edge_labels)
+        return (edge_scores, edge_labels)
 
 
 
