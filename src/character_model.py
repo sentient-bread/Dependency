@@ -53,14 +53,14 @@ class CharacterModel(nn.Module):
         # we merge first two dimensions: [batch_size * num_words x num_characters x embedding_size]
 
         hidden_vectors, (last_hidden_state, last_cell_state) = self.lstm(lstm_inputs)
-        ic(hidden_vectors.size()) # Gives: [batch_size * num_words x num_characters x hidden_size]
+        # ic(hidden_vectors.size()) # Gives: [batch_size * num_words x num_characters x hidden_size]
 
 
         attended_vectors = self.attention_vector(hidden_vectors)
-        ic(attended_vectors.size()) # gives [batch_size * num_words x word_length x 1]
+        # ic(attended_vectors.size()) # gives [batch_size * num_words x word_length x 1]
 
         a = self.softmax_layer(attended_vectors)
-        ic(a.size()) # [batch_size * num_words x word_length x 1]
+        # ic(a.size()) # [batch_size * num_words x word_length x 1]
 
         hidden_vectors_swapped = torch.swapaxes(hidden_vectors, 1, 2) # H^T
         # dimensions: [batch_size * num_words x hidden_size x num_characters]
@@ -69,7 +69,7 @@ class CharacterModel(nn.Module):
         # in the formula this looks like
         # h_tilde = H^{transpose} a
 
-        ic(h_tilde.size()) # num_words * num_words x hidden_size x 1
+        # ic(h_tilde.size()) # num_words * num_words x hidden_size x 1
         h_tilde_squeeze = h_tilde.squeeze(dim=2)
         last_cell_state_squeeze = last_cell_state.squeeze(dim=0)
         # ic(h_tilde_squeeze.size(), last_cell_state_squeeze.size())
@@ -79,7 +79,7 @@ class CharacterModel(nn.Module):
                                 (h_tilde_squeeze, last_cell_state_squeeze), 1
                                 )
                             )
-        ic(v_hat.size()) # [batch_size * num_words x embedding_size]
+        # ic(v_hat.size()) # [batch_size * num_words x embedding_size]
 
         # unmerging dimensions
 
@@ -93,30 +93,30 @@ class CharacterModel(nn.Module):
 
 
 
-def train_character_model(train_path, num_epochs):
+# def train_character_model(train_path, num_epochs):
 
-    # train_dataset = DatasetCharacter(False, file_path=train_path)
-    train_dataset = Dataset(False, file_path=train_path, character_dataset=True)
+#     # train_dataset = DatasetCharacter(False, file_path=train_path)
+#     train_dataset = Dataset(False, file_path=train_path, character_dataset=True)
 
 
-    dataloader = torch.utils.data.DataLoader(train_dataset, shuffle=True, batch_size=69)
+#     dataloader = torch.utils.data.DataLoader(train_dataset, shuffle=True, batch_size=69)
 
-    model = CharacterModel(100, 
-                            len(train_dataset.character_dataset.character_vocab), 
-                            400, 
-                            100, 
-                            len(train_dataset.character_dataset.character_vocab), 
-                            train_dataset.character_dataset.length_longest_word,
-                            character_vocab=train_dataset.character_dataset.character_vocab,
-                            character_to_indices=train_dataset.character_dataset.character_to_indices).to(DEVICE)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+#     model = CharacterModel(100, 
+#                             len(train_dataset.character_dataset.character_vocab), 
+#                             400, 
+#                             100, 
+#                             len(train_dataset.character_dataset.character_vocab), 
+#                             train_dataset.character_dataset.length_longest_word,
+#                             character_vocab=train_dataset.character_dataset.character_vocab,
+#                             character_to_indices=train_dataset.character_dataset.character_to_indices).to(DEVICE)
+#     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-    loss_fun = torch.nn.CrossEntropyLoss()
+#     loss_fun = torch.nn.CrossEntropyLoss()
 
-    for batch in dataloader:
-        model(batch[1])
+#     for batch in dataloader:
+#         model(batch[1])
 
-train_character_model('../data/UD_English-Atis/en_atis-ud-train.conllu', 1)
+# train_character_model('../data/UD_English-Atis/en_atis-ud-train.conllu', 1)
 
 # model_load = torch.load(CHARACTER_MODEL_PATH).to(DEVICE)
 # test_character_model(model_load, '../data/UD_English-Atis/en_atis-ud-train.conllu')
