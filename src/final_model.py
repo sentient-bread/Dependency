@@ -54,7 +54,8 @@ class Parser(nn.Module):
         self.edge_scorer = EdgeScorer(head_dep, vocab_size,
                                     word_embedding_dimension, hidden_size,
                                     pos_embedding_dimension, num_pos_tags,
-                                    pos_tagger, self.common_lstm, vocab,
+                                    pos_tagger, self.common_lstm, self.pos_embeddings,
+                                    vocab,
                                     word_to_indices)
 
         self.edge_labeller = EdgeLabeller(labeller_state, vocab_size,
@@ -148,7 +149,7 @@ def train_model(train_path, num_epochs):
 
     model = Parser(400, 100,
                     len(train_dataset.vocab), 100,
-                    200, 100, 17,
+                    200, 100, 18,
                     pos_tagger,
                     100,
                     train_dataset.pretrained_embedding_weights,
