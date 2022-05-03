@@ -35,27 +35,41 @@ class CharacterModel(nn.Module):
 
     def forward(self, batch):
         #ic(batch)
-        # ic(batch.size()) # Gives: [batch_size x window_size]
+        ic(batch.shape)
+        # ic(batch.size()) # Gives: [batch_size x num_word x num_characters]
         embedding_vectors = self.embedding_layer(batch)
-        # ic(embedding_vectors.size()) # Gives: [batch_size x window_size x embedding_dimension]
-        hidden_vectors, (last_hidden_state, last_cell_state) = self.lstm(embedding_vectors)
-        # ic(hidden_vectors.size()) # Gives: [batch_size x window_size x hidden_size]
+        # ic(embedding_vectors.shape) # batch_size x num_words x num_characters x embedding_size
+
+
+        ic(embedding_vectors.view(embedding_vectors.shape[0]*embedding_vectors.shape[1], embedding_vectors.shape[2], embedding_vectors.shape[3]).shape)
+        lstm_inputs = embedding_vectors.view(embedding_vectors.shape[0]*embedding_vectors.shape[1], 
+                                            embedding_vectors.shape[2], 
+                                            embedding_vectors.shape[3])
+
+        # Above line is important because of how lstm takes inputs
+        # it can only take 3 dimensional tensors
+        # we want it to treat a word as a sequence and that is the only thing we care for
+        # we originally had [batch_size x num_words x num_characters x embedding_size]
+        # we merge first two dimensions: [batch_size * num_words x num_characters x embedding_size]
+
+        hidden_vectors, (last_hidden_state, last_cell_state) = self.lstm(lstm_inputs)
+        ic(hidden_vectors.size()) # Gives: [batch_size * num_words x num_characters x hidden_size]
 
 
         attended_vectors = self.attention_vector(hidden_vectors)
-        ic(attended_vectors.size()) # gives [batch_size x hidden_size x 1]
+        ic(attended_vectors.size()) # gives [batch_size * num_words x word_length x 1]
 
         a = self.softmax_layer(attended_vectors)
-        ic(a.size())
+        ic(a.size()) # [batch_size * num_words x word_length x 1]
 
         hidden_vectors_swapped = torch.swapaxes(hidden_vectors, 1, 2) # H^T
-        # dimensions: [batch_size x hidden_size x window_size]
+        # dimensions: [batch_size * num_words x hidden_size x num_characters]
 
         h_tilde = torch.matmul(hidden_vectors_swapped, a)
         # in the formula this looks like
         # h_tilde = H^{transpose} a
 
-        # ic(h_tilde.size()) # batch_size x seq_len x 1
+        ic(h_tilde.size()) # num_words * num_words x hidden_size x 1
         h_tilde_squeeze = h_tilde.squeeze(dim=2)
         last_cell_state_squeeze = last_cell_state.squeeze(dim=0)
         # ic(h_tilde_squeeze.size(), last_cell_state_squeeze.size())
@@ -65,8 +79,16 @@ class CharacterModel(nn.Module):
                                 (h_tilde_squeeze, last_cell_state_squeeze), 1
                                 )
                             )
-        #ic(v_hat.size())
-        return v_hat
+        ic(v_hat.size()) # [batch_size * num_words x embedding_size]
+
+        # unmerging dimensions
+
+        v_hat_unmerged = v_hat.view(batch.shape[0], batch.shape[1], self.embedding_size)
+        # ic(v_hat_unmerged.shape) #[batch_size x num_words x embedding_size]
+        # the forward method returns something like te output of an embedding layer
+        # therefore this can be used directly
+
+        return v_hat_unmerged
 
 
 
