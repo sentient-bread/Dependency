@@ -93,30 +93,30 @@ class CharacterModel(nn.Module):
 
 
 
-# def train_character_model(train_path, num_epochs):
+def train_character_model(train_path, num_epochs):
 
-#     # train_dataset = DatasetCharacter(False, file_path=train_path)
-#     train_dataset = Dataset(False, file_path=train_path, character_dataset=True)
-
-
-#     dataloader = torch.utils.data.DataLoader(train_dataset, shuffle=True, batch_size=69)
-
-#     model = CharacterModel(100, 
-#                             len(train_dataset.character_dataset.character_vocab), 
-#                             400, 
-#                             100, 
-#                             len(train_dataset.character_dataset.character_vocab), 
-#                             train_dataset.character_dataset.length_longest_word,
-#                             character_vocab=train_dataset.character_dataset.character_vocab,
-#                             character_to_indices=train_dataset.character_dataset.character_to_indices).to(DEVICE)
-#     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-
-#     loss_fun = torch.nn.CrossEntropyLoss()
-
-#     for batch in dataloader:
-#         model(batch[1])
+    # train_dataset = DatasetCharacter(False, file_path=train_path)
+    train_dataset = Dataset(False, file_path=train_path, character_dataset=True)
 
 
+    dataloader = torch.utils.data.DataLoader(train_dataset, shuffle=True, batch_size=69)
+
+    model = CharacterModel(100, 
+                            len(train_dataset.character_dataset.character_vocab), 
+                            400, 
+                            100, 
+                            len(train_dataset.character_dataset.character_vocab), 
+                            train_dataset.character_dataset.length_longest_word,
+                            character_vocab=train_dataset.character_dataset.character_vocab,
+                            character_to_indices=train_dataset.character_dataset.character_to_indices).to(DEVICE)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+    loss_fun = torch.nn.CrossEntropyLoss()
+
+    for batch in dataloader:
+        model(batch[1])
+
+train_character_model('../data/UD_English-Atis/en_atis-ud-train.conllu', 1)
 
 # model_load = torch.load(CHARACTER_MODEL_PATH).to(DEVICE)
 # test_character_model(model_load, '../data/UD_English-Atis/en_atis-ud-train.conllu')
