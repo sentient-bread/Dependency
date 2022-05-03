@@ -90,3 +90,8 @@ Overall
 weighted avg       0.99      0.99      0.99     19924
 
 
+# Attachment scores
+
+Attachment label: 0.6303009575923393
+Attachment heads: 0.9897400820793434
+
