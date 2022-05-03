@@ -8,7 +8,7 @@ PAD_DEPENDENCY = -1
 # The reason is that -1 refers to the dummy head
 
 class Dataset(torch.utils.data.Dataset):
-  def __init__(self, from_vocab=False, file_path=None, vocab=None, words_to_indices=None):
+  def __init__(self, from_vocab=False, file_path=None, vocab=None, words_to_indices=None, character_dataset=False):
     # cheap constructor overloading
 
     self.tags_to_indices = {tag: index for index, tag in enumerate(
@@ -106,6 +106,11 @@ class Dataset(torch.utils.data.Dataset):
       # was added, 1-based indexing became 0-based, as needed.
       self.dataset.append((word_indices, tag_indices, heads))
 
+    self.character_dataset = character_dataset
+    self.character_dataset = DatasetCharacter(word_vocab=self.vocab,
+                                              word_to_indices=self.words_to_indices,
+                                              dataset_array=self.dataset,
+                                              length_longest_sentence=self.length_longest_sequence)
 
   def index(self, word):
     try: idx = self.words_to_indices[word]
@@ -146,14 +151,12 @@ class Dataset(torch.utils.data.Dataset):
                                               PAD_DEPENDENCY,
     )
 
+    if self.character_dataset:
+      character_tensor = self.character_dataset.__getitem__(index)
+      return to_ret_padded, character_tensor
+
     return to_ret_padded
 
-# test_dataset = Dataset(trainfile='../data/UD_English-Atis/en_atis-ud-test.conllu')
-# test_dataloader = torch.utils.data.DataLoader(test_dataset, shuffle=True, batch_size=BATCH_SIZE)
-
-# for batch in test_dataloader:
-
-#   ic(batch[:, 0, :], batch[:, 0, :].shape)
 
 class DatasetCharacter(torch.utils.data.Dataset):
 
@@ -162,121 +165,110 @@ class DatasetCharacter(torch.utils.data.Dataset):
   """
 
   def __init__(self,
-              from_character_vocab=False,
-              file_path=None,
-              character_vocab=None,
-              character_to_indices=None):
+              word_vocab=None,
+              word_to_indices=None,
+              dataset_array=None,
+              length_longest_sentence=0):
+
+    """
+    The DatasetCharacter is tied to a Dataset class
+    the dataset_array is an array of tuples
+    The 0th element of each tuple consists of the indices of the list of tokens in the sentence
+    """
+    super().__init__()
+    self.word_vocab = word_vocab
+    self.words_to_indices=  word_to_indices
+    self.dataset_array = dataset_array
+    self.length_longest_sentence = length_longest_sentence
 
 
 
-    if from_character_vocab:
-      self.character_vocab = character_vocab
-      self.character_to_indices = character_to_indices
 
-    else:
-      self.character_to_indices = {}
-      self.character_vocab = []
+    self.character_to_indices = {}
+    self.character_vocab = []
+    self.length_longest_word = 0
 
-    dataset = []
+    self.process_word_vocab(self.word_vocab)
+
     self.dataset = []
+    self.dataset = [self.word_index_list_to_character_list(tup[0],
+                                                            self.length_longest_word) for tup in dataset_array]
 
-    character_sequence = ""
+  def process_word_vocab(self, vocab):
+    len_longest_word = 0
+    character_set = set()
+    # to create character vocab
+    for word in vocab:
+      if len_longest_word < len(word):
+        len_longest_word = len(word)
+      for character in word:
+        character_set.add(character)
 
-    self.length_longest_character_sequence = 0
+    self.length_longest_word = len_longest_word
+    self.character_vocab = sorted(list(character_set), key=ord)
+    # sort according to unicode because it's nice
+    self.character_vocab.append("<PAD>")
+    self.character_vocab.append("<EOS>")
 
-    character_set = set() # relevant when we are creating the vocabulary
-
-    with open(file_path, "r") as f:
-
-      lines = f.readlines()
-
-      for line in lines:
-
-        len_last_read = len(character_sequence)
-
-        if len_last_read > self.length_longest_character_sequence:
-          self.length_longest_character_sequence = len_last_read
-
-        if (len(line) > 0 and line[0] != "#"):
-          # because we only care about the comment line having sentence
-          continue
-
-        tokens = line.split(" ")
-
-        if tokens[1] == "text":
-          # we care about the lines that start with "# text = "
-          character_sequence = line[8:] # keep everything after "# text = "
-          dataset.append(character_sequence)
-
-        if not from_character_vocab:
-          # we are creating the character vocab
-          for character in character_sequence:
-            character_set.add(character)
-
-      if not from_character_vocab:
-        self.character_vocab = sorted(list(character_set), key=ord)
-        # sort according to unicode because it's nice
-        self.character_vocab.append("<PAD>")
-        self.character_vocab.append("<EOS>")
-
-        self.character_to_indices = {character: index for index, character in enumerate(self.character_vocab)}
-        # create a reverse mapping
-
-      # turn all sequences into indices in the dataset
-
-      for sequence in dataset:
-        indices_sequence = self.characterseq_to_indices(sequence)
-        indices_sequence.append(len(self.character_vocab)-1)
-        # end of sentence added at the end
-        self.dataset.append(indices_sequence)
-
-  def characterseq_to_indices(self, character_sequence):
-
-    return_array = []
-
-    for character in character_sequence:
-      return_array.append(self.character_to_indices[character])
+    self.character_to_indices = {character: index for index, character in enumerate(self.character_vocab)}
 
 
-    return return_array
+  def word_to_character_index_list(self, word, pad, left_pad=False):
+    """
+    replaces each character with index
+    and right pads with the padding token index (by default)
+    or left pads
+    """
+    total_length: int = len(word) + pad
+    padding_token = len(self.character_vocab) - 2
+
+    if left_pad:
+      return [padding_token if i < pad else self.character_to_indices[word[i-pad]]
+                for i in range(total_length)]
+
+    return [self.character_to_indices[word[i]] if i < len(word) else padding_token
+              for i in range(total_length)]
+
+  def word_index_list_to_character_list(self, indices, len_longest_word, left_pad=False):
+
+    # return [
+    #   self.word_to_character_index_list(self.word_vocab[index],
+    #                               len_longest_word-len(self.word_vocab[index]), left_pad)
+    #   for index in indices
+
+    # ]
+    ret_list = []
+
+    for index in indices:
+      ret_list.append(self.word_to_character_index_list(self.word_vocab[index],
+                                                        len_longest_word-len(self.word_vocab[index]),
+                                                        left_pad))
+    return ret_list
+
+
 
   def __len__(self):
     return len(self.dataset)
 
   def __getitem__(self, index):
-
     to_ret = self.dataset[index]
-    seq_len = len(to_ret)
-    to_pad = self.length_longest_character_sequence - seq_len
-    to_ret_tensor = torch.tensor(to_ret).to(DEVICE)
-    to_ret_padded = torch.nn.functional.pad(to_ret_tensor,
-                                            (to_pad, 0),
-                                            "constant",
-                                            len(self.character_vocab)-2
-                                            )
-    # basically left padded with <PAD> vector
+    sentence_length = len(to_ret)
+    to_pad_sentence = self.length_longest_sentence - sentence_length
 
-    return to_ret_padded
+    # Note the <PAD> word token is considered as a sequence of <pad> characters
+    # length equal to the longest word
+    padding = to_pad_sentence * [ self.length_longest_word * [len(self.character_vocab)-2]]
+    to_ret_padded = to_ret + padding
+    to_ret_tensor = torch.tensor(to_ret_padded).to(DEVICE)
+    # ic(to_ret_tensor.shape) # [sentence_size x word_size]
+    return to_ret_tensor
 
-#Test code 
 
-# dataset = DatasetCharacter(False, file_path='../data/UD_English-Atis/en_atis-ud-train.conllu')
+# test_dataset = Dataset(False, file_path='../data/UD_English-Atis/en_atis-ud-test.conllu', character_dataset=True)
+# test_dataloader = torch.utils.data.DataLoader(test_dataset, shuffle=True, batch_size=1)
 
-# ic(dataset.character_vocab)
+# ic(next(iter(test_dataloader))[1].shape) # batch_size x sentence_size x batch_size
 
-# dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=30)
+# for batch in test_dataloader:
 
-# for batch in dataloader:
-#   ic(batch.size)
-#   ic(batch)
-
-# dataset_test = DatasetCharacter(True,
-#                                 file_path='../data/UD_English-Atis/en_atis-ud-test.conllu'
-#                                 , character_vocab=dataset.character_vocab,
-#                                 character_to_indices=dataset.character_to_indices)
-
-# dataloader_test = torch.utils.data.DataLoader(dataset_test, shuffle=True, batch_size=30)
-
-# for batch in dataloader_test:
-#   ic(batch.size)
-#   ic(batch)
+#   ic(batch[:, 0, :], batch[:, 0, :].shape)
