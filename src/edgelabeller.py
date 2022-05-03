@@ -22,6 +22,9 @@ class EdgeLabeller(nn.Module):
     super().__init__()
 
     self.pos_tagger = pos_tagger
+    self.vocab = vocab
+    self.words_to_indices = words_to_indices
+    self.relations_to_indices = relations_to_indices
 
     self.word_embedding_layer = nn.Embedding(vocab_size, word_embedding_dimension)
     self.pos_embedding_layer = nn.Embedding(num_pos_tags, pos_embedding_dimension)
@@ -125,47 +128,3 @@ class EdgeLabeller(nn.Module):
   def predict(self, batch):
     scores = self.forward(batch)
     return scores.argmax(dim=1)
-
-def train_epoch(model, optimizer, loss_fun, dataloader):
-  avg_loss = 0
-  for batch in dataloader:
-    predictions = model(batch)
-    target = batch[:, 3, :]
-    loss = loss_fun(predictions, target)
-
-    loss.backward()
-    ic(loss)
-    avg_loss += loss
-    optimizer.step()
-    optimizer.zero_grad()
-
-  avg_loss /= len(dataloader)
-  ic(avg_loss)
-
-def train(model, optimizer, loss_fun, dataset, num_epochs):
-  for epoch in range(num_epochs):
-    print(f"{epoch+1}")
-    dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=BATCH_SIZE)
-    train_epoch(model, optimizer, loss_fun, dataloader)
-    print("-------")
-    torch.save(model, EDGELABELLER_MODEL_PATH)
-
-def train_edgelabeller(train_path, num_epochs):
-  train_dataset = Dataset(from_vocab=False, file_path=train_path, vocab=None, words_to_indices=None)
-
-  postagger = torch.load(POS_MODEL_PATH, map_location=torch.device('cpu'))
-  postagger.eval()
-  for param in postagger.parameters():
-    param.requires_grad = False
-
-  model = EdgeLabeller(100, len(train_dataset.vocab),
-                       100, 50,
-                       100, 18, postagger,
-                       vocab=train_dataset.vocab,
-                       words_to_indices=train_dataset.words_to_indices).to(DEVICE)
-
-  optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-
-  loss_fun = nn.CrossEntropyLoss(ignore_index=PAD_DEPENDENCY)
-
-  train(model, optimizer, loss_fun, train_dataset, num_epochs)

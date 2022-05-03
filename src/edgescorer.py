@@ -87,8 +87,9 @@ class EdgeScorer(nn.Module):
 def train_epoch(model, optimizer, loss_fun, dataloader):
   avg_loss = 0
   for batch in dataloader:
-    pred = model(batch)
-    targ = batch[:, HEADS_IN_BATCH, :]
+    word_level_batch = batch[WORD_LEVEL]
+    pred = model(word_level_batch)
+    targ = word_level_batch[:, HEADS_IN_BATCH, :]
     loss = loss_fun(pred, targ)
 
     loss.backward()
@@ -134,10 +135,11 @@ def test_edgescorer(model, test_path):
 
   total, matches = 0, 0
   for batch in dataloader:
-      inp = batch[:, WORDS_IN_BATCH, :]
+      word_level_batch = batch[WORD_LEVEL]
+      inp = word_level_batch[:, WORDS_IN_BATCH, :]
       pred = model.predict(inp)
-      targ = batch[:, HEADS_IN_BATCH, :]
-      comparison = torch.flatten(torch.stack((model.predict(inp), targ), dim=2),
+      targ = word_level_batch[:, HEADS_IN_BATCH, :]
+      comparison = torch.flatten(torch.stack((pred, targ), dim=2),
                                  start_dim=0, end_dim=1)
 
       for pred_head, real_head in comparison:

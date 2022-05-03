@@ -71,10 +71,11 @@ class POSTag(nn.Module):
 def train_epoch(model, optimizer, loss_fun, dataloader):
 
   for batch in dataloader:
-    out = model(batch[:, 0, :])
+    word_level_batch = batch[WORD_LEVEL]
+    out = model(word_level_batch[:, WORDS_IN_BATCH, :])
     most_likely = model.predict(out)
     out_swapped = torch.swapaxes(out, 1, 2)
-    loss = loss_fun(out_swapped, batch[:, 1, :])
+    loss = loss_fun(out_swapped, word_level_batch[:, POS_IN_BATCH, :])
     # assuming that the loss function is cross entropy loss
     # out is a set embeddings making sentences that make batches
     # on the comparison we just give it the pos tags
@@ -130,14 +131,15 @@ def test_model(model, test_file_path):
   sum_accuracy = 0
 
   for batch in dataloader:
-    pred = model(batch[:, 0, :])
+    word_level_batch = batch[WORD_LEVEL]
+    pred = model(word_level_batch[:, WORDS_IN_BATCH, :])
     pred = model.predict(pred)
     total_tokens = 0
     accurate_tokens = 0
 
     for i in range(pred.shape[-1]):
-      if batch[:, 1, i] != 17:
-        if pred[:, i] == batch[:, 1, i]:
+      if word_level_batch[:, POS_IN_BATCH, i] != len(POS_TAGS):
+        if pred[:, i] == word_level_batch[:, POS_IN_BATCH, i]:
           accurate_tokens += 1
         total_tokens += 1
     accuracy = accurate_tokens / total_tokens
@@ -158,17 +160,18 @@ def all_metrics(model, test_file_path):
 
   dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE)
 
-  tag_dict = {i: tag for tag, i in test_dataset.tags_to_indices.items()}
+  tag_dict = {i: tag for tag, i in TAGS_TO_INDICES.items()}
 
   pred_all = []
   gold_all = []
   for i, batch in enumerate(dataloader):
-    pred = model(batch[:, 0, :])
+    word_level_batch = batch[WORD_LEVEL]
+    pred = model(word_level_batch[:, WORDS_IN_BATCH, :])
     pred = model.predict(pred)
     pred = torch.flatten(pred)
     pred = [tag_dict[i.item()] for i in pred]
     
-    gold = batch[:, 1, :]
+    gold = word_level_batch[:, POS_IN_BATCH, :]
     gold = torch.flatten(gold)
     gold = [tag_dict[i.item()] for i in gold]
 

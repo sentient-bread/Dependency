@@ -7,6 +7,7 @@ CHARACTER_MODEL_PATH = "../models/character_model.pth"
 EDGELABELLER_MODEL_PATH = "../models/edgelabeller_model.pth"
 
 WORDS_IN_BATCH, POS_IN_BATCH, HEADS_IN_BATCH, LABELS_IN_BATCH = range(4)
+WORD_LEVEL, CHARACTER_LEVEL = range(2)
 
 UNIVERSAL_DEPENDENCY_LABELS = [
     "<null>", # --
@@ -76,8 +77,35 @@ UNIVERSAL_DEPENDENCY_LABELS = [
     "xcomp",
 ]
 
+POS_TAGS = [
+    'ADJ',
+    'ADP',
+    'ADV',
+    'AUX',
+    'CCONJ',
+    'DET',
+    'INTJ',
+    'NOUN',
+    'NUM',
+    'PART',
+    'PRON',
+    'PROPN',
+    'PUNCT',
+    'SCONJ',
+    'SYM',
+    'VERB',
+    'X',
+    'NULL'
+]
+
 RELATIONS_TO_INDICES = {
     tag: index for index, tag in enumerate(
         UNIVERSAL_DEPENDENCY_LABELS
+    )
+}
+
+TAGS_TO_INDICES = {
+        tag: index for index, tag in enumerate(
+            POS_TAGS
     )
 }

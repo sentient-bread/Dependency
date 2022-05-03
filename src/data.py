@@ -12,11 +12,6 @@ class Dataset(torch.utils.data.Dataset):
   def __init__(self, from_vocab=False, file_path=None, vocab=None, words_to_indices=None, make_character_dataset=False):
     # cheap constructor overloading
 
-    self.tags_to_indices = {tag: index for index, tag in enumerate(
-                              ['ADJ',   'ADP', 'ADV',  'AUX',  'CCONJ', 'DET', 'INTJ',
-                               'NOUN',  'NUM', 'PART', 'PRON', 'PROPN', 'PUNCT',
-                               'SCONJ', 'SYM', 'VERB', 'X', 'NULL'])}
-
     if from_vocab:
       self.vocab = vocab
       self.words_to_indices = words_to_indices
@@ -104,7 +99,7 @@ class Dataset(torch.utils.data.Dataset):
 
     for (words, tags, heads, relations) in dataset:
       word_indices = [self.index(word) for word in words]
-      tag_indices = [self.tags_to_indices[tag] for tag in tags]
+      tag_indices = [TAGS_TO_INDICES[tag] for tag in tags]
       relation_indices = [RELATIONS_TO_INDICES[relation] for relation in relations]
       # converts sentence indices to vocabulary indices
 
@@ -190,7 +185,7 @@ class Dataset(torch.utils.data.Dataset):
     to_ret_padded[index_of_pos_tags] = torch.nn.functional.pad(to_ret_tensor[index_of_pos_tags],
                                               (0, amount_to_pad),
                                               "constant",
-                                              len(self.tags_to_indices)-1
+                                              len(TAGS_TO_INDICES)-1
                                               )
 
     to_ret_padded[index_of_tree_info] = torch.nn.functional.pad(to_ret_tensor[index_of_tree_info],
