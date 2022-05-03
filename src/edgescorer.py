@@ -10,7 +10,7 @@ class EdgeScorer(nn.Module):
   def __init__(self, output_size, vocab_size,
                word_embedding_dimension, hidden_size,
                pos_embedding_dimension, num_pos_tags, pos_tagger,
-               common_lstm,
+               common_lstm, pos_embedding_layer=None,
                vocab=None, words_to_indices=None):
     nn.Module.__init__(self)
 
@@ -20,7 +20,7 @@ class EdgeScorer(nn.Module):
     # Object of POSTag class
 
     self.word_embedding_layer = nn.Embedding(vocab_size, word_embedding_dimension)
-    self.pos_embedding_layer = nn.Embedding(num_pos_tags, pos_embedding_dimension)
+    self.pos_embedding_layer = pos_embedding_layer or nn.Embedding(num_pos_tags, pos_embedding_dimension)
 
     self.lstm = nn.LSTM(word_embedding_dimension+pos_embedding_dimension, hidden_size,
                         bidirectional=True,batch_first=True)
