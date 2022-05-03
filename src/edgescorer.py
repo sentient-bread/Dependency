@@ -34,12 +34,16 @@ class EdgeScorer(nn.Module):
     # It's just to make training and mat mult convenient afaiu
     # Probabilities = H_head @ (W_arc @ H_dep + B_arc)
 
-  def forward(self, batch):
+  def forward(self, batch, train=False):
     words_embedded = self.word_embedding_layer(batch[:, WORDS_IN_BATCH, :])
 
-    pos_tags_probabilities = self.pos_tagger(batch[:, WORDS_IN_BATCH, :])
-    pos_tags = self.pos_tagger.predict(pos_tags_probabilities)
-    pos_embedded = self.pos_embedding_layer(pos_tags)
+    if not train:
+      pos_tags_probabilities = self.pos_tagger(batch[:, WORDS_IN_BATCH, :])
+      pos_tags = self.pos_tagger.predict(pos_tags_probabilities)
+      pos_embedded = self.pos_embedding_layer(pos_tags)
+
+    else:
+      pos_embedded = self.pos_embedding_layer(batch[:, POS_IN_BATCH, :])
 
     lstm_inputs = torch.cat((words_embedded, pos_embedded), dim=2)
     # Concatenate each word's embedding to its POS tag embedding
