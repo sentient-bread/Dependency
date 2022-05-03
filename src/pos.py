@@ -187,11 +187,11 @@ def all_metrics(model, test_file_path):
 
 # train_POS(train_path, 20)
 
-# load_model = torch.load(POS_MODEL_PATH).to(DEVICE)
+load_model = torch.load(POS_MODEL_PATH).to(DEVICE)
 
 # ic(load_model.vocab)
 
-# test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
+test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
 
 # test_model(load_model, test_file_path)
 
