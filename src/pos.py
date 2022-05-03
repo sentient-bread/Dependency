@@ -193,6 +193,6 @@ load_model = torch.load(POS_MODEL_PATH).to(DEVICE)
 
 test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
 
-test_model(load_model, test_file_path)
+# test_model(load_model, test_file_path)
 
-all_metrics(load_model, test_file_path)
+# all_metrics(load_model, test_file_path)

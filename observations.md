@@ -19,6 +19,10 @@
 * ES trained on 13.2% accurate POS tagger achieves 91.5% accuracy. Replaced with 98.6% accurate POS tagger, achieves 68.1% accuracy. It used bad tags?
 * ES without POS tagger achieves 90.9% accuracy. It's not needed?
 
+# Notes about the character model
+
+- Each word is represented as a list of characters and is padded to the right for now 
+- the lstm of the character model goes word by word. We feel that this is a problem for examples in hindi like empty verbs: "naach rahe hai" we don't want to separate the context of "rahe hai" from "naach". But the language tokenizes this morphemic information and this could have been covered by the character level model.
 
 * We're training one LSTM **each** for the EdgeScorer and EdgeLabeller classes,
   and getting our hidden states that we pass to MLPs internally to each class.

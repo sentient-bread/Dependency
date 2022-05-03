@@ -41,10 +41,10 @@ class EdgeLabeller(nn.Module):
   def forward(self, batch):
     # Assuming that the batch has three lists: words, pos, heads
     WORDS, POS, HEADS = 0, 1, 2
-    ic(batch.shape)
+    ic(batch)
 
     words_embedded = self.word_embedding_layer(batch[:, WORDS, :])
-    heads_indices = torch.tensor(batch[:, HEADS, :])
+    heads_indices = torch.tensor(batch[:, HEADS, :]).to(DEVICE)
     # Heads indices must be of the form
     # [ [indices for first sentence in batch]
     #   [indices for second sentence in batch]
@@ -142,7 +142,7 @@ def train_epoch(model, optimizer, loss_fun, dataloader):
   avg_loss /= len(dataloader)
   ic(avg_loss)
 
-def train(model, optimizer, loss_fin, dataset, num_epochs):
+def train(model, optimizer, loss_fun, dataset, num_epochs):
   for epoch in range(num_epochs):
     print(f"{epoch+1}")
     dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=BATCH_SIZE)
@@ -162,7 +162,7 @@ def train_edgelabeller(train_path, num_epochs):
                        100, 50,
                        100, 18, postagger,
                        vocab=train_dataset.vocab,
-                       words_to_indices=train_dataset.words_to_indices)
+                       words_to_indices=train_dataset.words_to_indices).to(DEVICE)
 
   optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
