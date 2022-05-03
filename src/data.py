@@ -9,7 +9,7 @@ PAD_DEPENDENCY = 0
 # The reason is that -1 refers to the dummy head
 
 class Dataset(torch.utils.data.Dataset):
-  def __init__(self, from_vocab=False, file_path=None, vocab=None, words_to_indices=None, character_dataset=False):
+  def __init__(self, from_vocab=False, file_path=None, vocab=None, words_to_indices=None, make_character_dataset=False):
     # cheap constructor overloading
 
     self.tags_to_indices = {tag: index for index, tag in enumerate(
@@ -112,8 +112,7 @@ class Dataset(torch.utils.data.Dataset):
       # was added, 1-based indexing became 0-based, as needed.
       self.dataset.append((word_indices, tag_indices, heads, relation_indices))
 
-
-    self.character_dataset = character_dataset
+    self.make_character_dataset = make_character_dataset
     self.character_dataset = DatasetCharacter(word_vocab=self.vocab,
                                               word_to_indices=self.words_to_indices,
                                               dataset_array=self.dataset,
@@ -205,7 +204,7 @@ class Dataset(torch.utils.data.Dataset):
                                               "constant",
                                               RELATIONS_TO_INDICES["<null>"],
     )
-    if self.character_dataset:
+    if self.make_character_dataset:
       character_tensor = self.character_dataset.__getitem__(index)
       return to_ret_padded, character_tensor
 
