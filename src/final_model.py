@@ -4,7 +4,7 @@ from settings import *
 from data import *
 from character_model import CharacterModel
 from pos import *
-from edgescorer import EdgeScorer
+from edgescorer import EdgeScorer, test_edgescorer
 from edgelabeller import EdgeLabeller
 
 
@@ -176,6 +176,61 @@ def train_model(train_path, num_epochs):
     train(model, optimizer, loss_fun, train_dataset, num_epochs)
 
 
-train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
-train_model(train_path, 10)
+# train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
+# train_model(train_path, 10)
 
+
+def test_model(test_path):
+
+    model = torch.load(GRAND_MODEL_PATH)
+    # edgescorer test
+
+    test_dataset = Dataset(from_vocab=True, file_path=test_path, vocab=model.vocab, words_to_indices=model.words_to_indices, make_character_dataset=True)
+    test_dataset.load_pretrained_embeddings(PRETRAINED_EMBEDDING_FILE)
+
+    dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE)
+
+    total, head_matches, rel_matches = 0, 0, 0
+
+    for batch in dataloader:
+        word_level_batch = batch[0]
+        character_level_batch = batch[1]
+
+        target_edges = word_level_batch[:, 2, :]
+        target_labels = word_level_batch[:, 3, :]
+        ic(target_labels.shape)
+
+        edge_scores, edge_label = model(batch)
+        ic(edge_label.shape)
+        edge_pred = edge_scores.argmax(dim=2)
+
+        label_pred = edge_label.argmax(dim=2)
+        ic(label_pred.shape)
+
+        comparison_edge = torch.flatten(torch.stack((edge_pred, target_edges), dim=2),
+                                 start_dim=0, end_dim=1)
+
+        comparison_label = torch.flatten(torch.stack((label_pred, target_labels), dim=2),
+                                 start_dim=0, end_dim=1)
+
+        total_edge, total_label = 0, 0
+        label_matches = 0
+        head_matches = 0
+
+        for pred_head, real_head in comparison_edge:
+
+            total_edge += 1
+            if pred_head == real_head: head_matches += 1
+
+
+        for pred_label, real_label in comparison_label:
+
+            total_label += 1
+            if pred_label == real_label: label_matches += 1
+    
+
+    print(f"Attachment label: {label_matches/total_label}")
+    print(f"Attachment heads: {head_matches/total_edge}")
+
+test_path = '../data/UD_English-Atis/en_atis-ud-test.conllu'
+test_model(test_path)
