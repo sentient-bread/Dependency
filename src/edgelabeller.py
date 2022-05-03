@@ -39,7 +39,7 @@ class EdgeLabeller(nn.Module):
     # The W^(rel) matrix in the original paper
     # The bias layer is encapsulated in the second matrix
 
-  def hidden_states_treatment(self, lstm_outputs, last_hidden_state, last_cell_state):
+  def hidden_states_treatment(self, lstm_outputs, last_hidden_state, last_cell_state, heads_indices):
 
     H_dep = self.dep_encoder(lstm_outputs)
 
@@ -125,7 +125,7 @@ class EdgeLabeller(nn.Module):
 
     lstm_outputs, (last_hidden_state, last_cell_state) = self.lstm(lstm_inputs)
 
-    return self.hidden_states_treatment(lstm_outputs, last_hidden_state, last_cell_state)
+    return self.hidden_states_treatment(lstm_outputs, last_hidden_state, last_cell_state, heads_indices)
 
   def predict(self, batch):
     scores = self.forward(batch)
