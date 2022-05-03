@@ -24,7 +24,7 @@ class CharacterModel(nn.Module):
         self.lstm = nn.LSTM(embedding_size, hidden_size, num_layers=CHARACTER_LSTM_LAYERS, batch_first=True)
 
         self.attention_vector = nn.Linear(self.hidden_size, 1)
-        # trainable attention vector that will do a weighted sum of hidden vectors
+        # layer that decides attention weights
 
         self.linear_layer_W = nn.Linear(self.hidden_size+self.hidden_size, 
                                         character_level_embedding)
