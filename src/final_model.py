@@ -103,7 +103,7 @@ class Parser(nn.Module):
             final_embeddings = torch.add(torch.add(holistic_embeddings, pretrained_embeddings), character_level_embeddings)
 
         else:
-            final_embeddings = torch.add(hollistic_embeddings, character_level_embeddings)
+            final_embeddings = torch.add(holistic_embeddings, character_level_embeddings)
 
         pos_embeddings = None
         heads_indices = None
@@ -135,13 +135,14 @@ class Parser(nn.Module):
         return (edge_scores, edge_labels)
 
 
-def test_model(test_path):
+def test_model(test_path, model_path, pretrained_embeddings=False):
 
-    model = torch.load(GRAND_MODEL_PATH)
+    model = torch.load(model_path).to(DEVICE)
+    ic(model.vocab_size)
     # edgescorer test
 
     test_dataset = Dataset(from_vocab=True, file_path=test_path, vocab=model.vocab, words_to_indices=model.words_to_indices, make_character_dataset=True)
-    test_dataset.load_pretrained_embeddings(PRETRAINED_EMBEDDING_FILE)
+    if pretrained_embeddings: test_dataset.load_pretrained_embeddings(PRETRAINED_EMBEDDING_FILE)
 
     dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE)
 
@@ -212,23 +213,23 @@ def train_epoch(model, optimizer, loss_fun, dataloader):
         optimizer.zero_grad()
 
 
-def train(model, optimizer, loss_fun, dataset, num_epochs):
+def train(model, optimizer, loss_fun, dataset, num_epochs, model_path, test_path):
 
     for epoch in range(num_epochs):
         print(f"{epoch+1}")
         dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=69)
         train_epoch(model, optimizer, loss_fun, dataloader)
-        if epoch%15 == 0:
-            test_path = '../data/UD_English-Atis/en_atis-ud-test.conllu'
-            test_model(test_path)
         print("-------")
-        torch.save(model, GRAND_MODEL_PATH)
+        torch.save(model, model_path)
+        # if epoch%15 == 0:
+        #     test_model(test_path, model_path)
 
-def train_model(train_path, num_epochs):
+def train_model(train_path, num_epochs, pos_model_path, model_path, test_path, pretrained=False):
     train_dataset = Dataset(from_vocab=False, file_path=train_path, make_character_dataset=True)
-    train_dataset.load_pretrained_embeddings(PRETRAINED_EMBEDDING_FILE)
+    if pretrained:
+        train_dataset.load_pretrained_embeddings(PRETRAINED_EMBEDDING_FILE)
 
-    pos_tagger = torch.load(POS_MODEL_PATH)
+    pos_tagger = torch.load(pos_model_path)
 
     model = Parser(400, 100,
                     len(train_dataset.vocab), 100,
@@ -246,13 +247,21 @@ def train_model(train_path, num_epochs):
 
     loss_fun = torch.nn.CrossEntropyLoss()
 
-    train(model, optimizer, loss_fun, train_dataset, num_epochs)
+    train(model, optimizer, loss_fun, train_dataset, num_epochs, model_path, test_path)
 
 
-#train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
-#train_model(train_path, 150)
-#
-#
-#
-#test_path = '../data/UD_English-Atis/en_atis-ud-test.conllu'
-#test_model(test_path)
+# train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
+# train_path = '../data/hindi/hi_hdtb-ud-train.conllu'
+train_path = '../data/sanskrit/sa_vedic-ud-train.conllu'
+
+# test_path = '../data/UD_English-Atis/en_atis-ud-test.conllu'
+# test_path = '../data/hindi/hi_hdtb-ud-test.conllu'
+test_path = '../data/sanskrit/sa_vedic-ud-test.conllu'
+# train_model(train_path, 50, POS_MODEL_PATH, GRAND_MODEL_PATH, True)
+# train_model(train_path, 50, POS_MODEL_PATH_HINDI, GRAND_MODEL_PATH_HINDI, False)
+# train_model(train_path, 50, POS_MODEL_PATH_SANSKRIT, GRAND_MODEL_PATH_SANSKRIT, test_path, False)
+
+
+
+
+test_model(test_path, GRAND_MODEL_PATH_SANSKRIT, False)
