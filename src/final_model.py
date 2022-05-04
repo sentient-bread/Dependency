@@ -20,6 +20,7 @@ class Parser(nn.Module):
                 pos_embedding_dimension,
                 num_pos_tags,
                 pos_tagger,
+                xpos_tagger,
                 character_embedding_dimension,
                 pretrained_embedding_weights,
                 character_vocab_size,
@@ -52,6 +53,7 @@ class Parser(nn.Module):
         self.pretrained_embedding_layer = nn.Embedding.from_pretrained(pretrained_embedding_weights)
 
         self.pos_embeddings = nn.Embedding.from_pretrained(pos_tagger.get_W_transpose_matrix().detach())
+        self.xpos_embeddings = nn.Embedding.from_pretrained(xpos_tagger.get_W_transpose_matrix().detach())
         ic(self.pos_embeddings.num_embeddings)
         self.common_lstm = nn.LSTM(word_embedding_dimension + pos_embedding_dimension, hidden_size,
                         bidirectional=True, batch_first=True)
@@ -94,15 +96,19 @@ class Parser(nn.Module):
 
         if train:
             pos_embeddings = self.pos_embeddings(word_level_batch[:, 1, :])
+            xpos_embeddings = self.xpos_embeddings(word_level_batch[:, 4, :])
             heads_indices = word_level_batch[:, HEADS, :]
 
         else:
             pos_distributions = self.pos_tagger(word_level_batch[:, 0, :])
             pos_predictions = self.pos_tagger.predict(pos_distributions)
             pos_embeddings = self.pos_embeddings(pos_predictions)
+            xpos_distributions = self.xpos_tagger(word_level_batch[:, 0, :])
+            xpos_predictions = self.xpos_tagger.predict(xpos_distributions)
+            xpos_embeddings = self.xpos_embeddings(xpos_predictions)
 
 
-        lstm_inputs = torch.cat((final_embeddings, pos_embeddings), dim=2)
+        lstm_inputs = torch.cat((final_embeddings, torch.add(pos_embeddings, xpos_embeddings)), dim=2)
 
         lstm_outputs, (last_hidden_state, last_cell_state) = self.common_lstm(lstm_inputs)
 
@@ -176,8 +182,8 @@ def train_model(train_path, num_epochs):
     train(model, optimizer, loss_fun, train_dataset, num_epochs)
 
 
-# train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
-# train_model(train_path, 50)
+train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
+train_model(train_path, 50)
 
 
 def test_model(test_path):
@@ -233,5 +239,5 @@ def test_model(test_path):
     print(f"Attachment label: {label_matches/total_label}")
     print(f"Attachment heads: {head_matches/total_edge}")
 
-test_path = '../data/UD_English-Atis/en_atis-ud-test.conllu'
-test_model(test_path)
+#test_path = '../data/UD_English-Atis/en_atis-ud-test.conllu'
+#test_model(test_path)

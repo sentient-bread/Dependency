@@ -68,13 +68,16 @@ class POSTag(nn.Module):
 
 
 
-def train_epoch(model, optimizer, loss_fun, dataloader):
+def train_epoch(model, optimizer, loss_fun, dataloader, xpos=False):
 
   for batch in dataloader:
     out = model(batch[:, 0, :])
     most_likely = model.predict(out)
     out_swapped = torch.swapaxes(out, 1, 2)
-    loss = loss_fun(out_swapped, batch[:, 1, :])
+    if (xpos):
+      loss = loss_fun(out_swapped, batch[:, 1, :])
+    else:
+      loss = loss_fun(out_swapped, batch[:, 4, :])
     # assuming that the loss function is cross entropy loss
     # out is a set embeddings making sentences that make batches
     # on the comparison we just give it the pos tags
@@ -84,37 +87,46 @@ def train_epoch(model, optimizer, loss_fun, dataloader):
     optimizer.step()
     optimizer.zero_grad()
 
-def train(model, optimizer, loss_fun, dataset, num_epochs):
+def train(model, optimizer, loss_fun, dataset, num_epochs, xpos=False):
 
   for epoch in range(num_epochs):
     print(f"{epoch+1}")
     dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=BATCH_SIZE)
-    train_epoch(model, optimizer, loss_fun, dataloader)
+    train_epoch(model, optimizer, loss_fun, dataloader, xpos)
     print("-------")
     torch.save(model, POS_MODEL_PATH)
 
 
-def train_POS(train_path, num_epochs):
+def train_POS(train_path, num_epochs, xpos=False):
 
   train_dataset = Dataset(False, file_path=train_path)
   # test_dataloader = torch.utils.data.DataLoader(test_dataset, shuffle=True, batch_size=BATCH_SIZE)
 
 
-
-  model = POSTag(
-                100,
-                len(train_dataset.vocab),
-                100,
-                200,
-                18,
-                vocab=train_dataset.vocab,
-                words_to_indices=train_dataset.words_to_indices).to(DEVICE)
+  if (xpos):
+    model = POSTag(
+                  100,
+                  len(train_dataset.vocab),
+                  100,
+                  200,
+                  18,
+                  vocab=train_dataset.vocab,
+                  words_to_indices=train_dataset.words_to_indices).to(DEVICE)
+  else:
+    model = POSTag(
+                  100,
+                  len(train_dataset.vocab),
+                  100,
+                  200,
+                  len(train_dataset.xpos_vocab),
+                  vocab=train_dataset.vocab,
+                  words_to_indices=train_dataset.words_to_indices).to(DEVICE)
 
   optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
   loss_fun = torch.nn.CrossEntropyLoss()
 
-  train(model, optimizer, loss_fun, train_dataset, num_epochs)
+  train(model, optimizer, loss_fun, train_dataset, num_epochs, xpos)
   # train_epoch(model, None, None, test_dataloader)
 
 
@@ -187,7 +199,7 @@ def all_metrics(model, test_file_path):
 
 # train_POS(train_path, 20)
 
-load_model = torch.load(POS_MODEL_PATH).to(DEVICE)
+load_model = torch.load(POS_MODEL_PATH, map_location=torch.device('cpu'))
 
 # ic(load_model.vocab)
 
