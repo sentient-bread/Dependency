@@ -196,6 +196,7 @@ def test_model(test_path):
         word_level_batch = batch[0]
         character_level_batch = batch[1]
 
+        deps = word_level_batch[:, 0, :]
         target_edges = word_level_batch[:, 2, :]
         target_labels = word_level_batch[:, 3, :]
         ic(target_labels.shape)
@@ -207,7 +208,7 @@ def test_model(test_path):
         label_pred = edge_label.argmax(dim=2)
         ic(label_pred.shape)
 
-        comparison_edge = torch.flatten(torch.stack((edge_pred, target_edges), dim=2),
+        comparison_edge = torch.flatten(torch.stack((deps, edge_pred, target_edges), dim=2),
                                  start_dim=0, end_dim=1)
 
         comparison_label = torch.flatten(torch.stack((label_pred, target_labels), dim=2),
@@ -217,16 +218,16 @@ def test_model(test_path):
         label_matches = 0
         head_matches = 0
 
-        for pred_head, real_head in comparison_edge:
+        for dep, pred_head, real_head in comparison_edge:
 
             total_edge += 1
-            if pred_head == real_head: head_matches += 1
+            if pred_head == real_head and dep != model.words_to_indices['<PAD>']: head_matches += 1
 
 
         for pred_label, real_label in comparison_label:
 
             total_label += 1
-            if pred_label == real_label: label_matches += 1
+            if pred_label == real_label and real_label != RELATIONS_TO_INDICES['<null>']: label_matches += 1
 
 
     print(f"Attachment label: {label_matches/total_label}")
