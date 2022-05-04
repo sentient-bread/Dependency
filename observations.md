@@ -89,11 +89,71 @@ Overall
    macro avg       0.97      0.95      0.96     19924
 weighted avg       0.99      0.99      0.99     19924
 
+# POS Tagger for Hindi
+
+Overall
+              precision    recall  f1-score   support
+
+         ADJ       0.92      0.86      0.89      2043
+         ADP       0.99      1.00      0.99      7544
+         ADV       0.89      0.86      0.87       304
+         AUX       0.97      0.98      0.97      2596
+       CCONJ       0.98      1.00      0.99       635
+         DET       0.95      0.96      0.96       745
+        NOUN       0.91      0.91      0.91      8036
+        NULL       1.00      1.00      1.00     77398
+         NUM       0.96      0.85      0.90       693
+        PART       0.99      0.96      0.98       677
+        PRON       0.98      0.97      0.97      1372
+       PROPN       0.84      0.88      0.86      4438
+       PUNCT       1.00      1.00      1.00      2420
+       SCONJ       0.98      0.99      0.99       655
+        VERB       0.96      0.94      0.95      3263
+           X       0.21      0.33      0.26         9
+
+    accuracy                           0.98    112828
+   macro avg       0.91      0.90      0.91    112828
+weighted avg       0.98      0.98      0.98    112828
+
+# POS Tagger for Sanskrit
+
+Overall
+              precision    recall  f1-score   support
+
+         ADJ       0.44      0.33      0.37       870
+         ADV       0.92      0.87      0.90      1084
+         AUX       0.80      0.44      0.57        90
+       CCONJ       0.99      0.96      0.98       152
+         DET       0.88      0.15      0.25        48
+        NOUN       0.77      0.74      0.75      3074
+        NULL       1.00      1.00      1.00    226008
+         NUM       0.86      0.28      0.42        89
+        PART       0.99      0.99      0.99       785
+        PRON       0.92      0.88      0.90      1443
+       SCONJ       0.86      0.82      0.84        97
+        VERB       0.62      0.82      0.71      1940
+
+    accuracy                           0.99    235680
+   macro avg       0.84      0.69      0.72    235680
+weighted avg       0.99      0.99      0.99    235680
+
+
 
 # Attachment scores
 
 Attachment label: 0.9492089925062448
 Attachment heads: 0.9685863874345549
+
+
+# Hindi attachment scores
+
+Attachment label: 0.9090909090909091
+Attachment heads: 0.9162303664921466
+
+# Sanskrit attachment scores
+
+Attachment label: 0.4508990318118949
+Attachment heads: 0.5780141843971631
 
 
 
