@@ -119,67 +119,6 @@ class Parser(nn.Module):
         return (edge_scores, edge_labels)
 
 
-
-
-def train_epoch(model, optimizer, loss_fun, dataloader):
-
-    for batch in dataloader:
-        edge_scorer_results, edge_label_results = model(batch, train=True)
-
-        edge_scorer_results_swapped = torch.swapaxes(edge_scorer_results, 1, 2)
-        edge_label_results_swapped = torch.swapaxes(edge_label_results, 1, 2)
-
-        word_level_batch = batch[0]
-        target_edge_scorer = word_level_batch[:, 2, :]
-        target_edge_labeller = word_level_batch[:, 3, :]
-        loss_scorer = loss_fun(edge_scorer_results_swapped, target_edge_scorer)
-        loss_labeller = loss_fun(edge_label_results_swapped, target_edge_labeller)
-
-        total_loss = loss_scorer + 2 * loss_labeller
-        ic(total_loss)
-        total_loss.backward()
-        optimizer.step()
-        optimizer.zero_grad()
-
-
-def train(model, optimizer, loss_fun, dataset, num_epochs):
-
-    for epoch in range(num_epochs):
-        print(f"{epoch+1}")
-        dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=69)
-        train_epoch(model, optimizer, loss_fun, dataloader)
-        print("-------")
-        torch.save(model, GRAND_MODEL_PATH)
-
-def train_model(train_path, num_epochs):
-    train_dataset = Dataset(from_vocab=False, file_path=train_path, make_character_dataset=True)
-    train_dataset.load_pretrained_embeddings(PRETRAINED_EMBEDDING_FILE)
-
-    pos_tagger = torch.load(POS_MODEL_PATH)
-
-    model = Parser(400, 100,
-                    len(train_dataset.vocab), 100,
-                    200, 100, 18,
-                    pos_tagger,
-                    100,
-                    train_dataset.pretrained_embedding_weights,
-                    len(train_dataset.character_dataset.character_vocab),
-                    train_dataset.character_dataset.character_vocab,
-                    train_dataset.character_dataset.character_to_indices,
-                    train_dataset.vocab,
-                    train_dataset.words_to_indices).to(DEVICE)
-
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-
-    loss_fun = torch.nn.CrossEntropyLoss()
-
-    train(model, optimizer, loss_fun, train_dataset, num_epochs)
-
-
-# train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
-# train_model(train_path, 50)
-
-
 def test_model(test_path):
 
     model = torch.load(GRAND_MODEL_PATH)
@@ -219,19 +158,85 @@ def test_model(test_path):
         head_matches = 0
 
         for dep, pred_head, real_head in comparison_edge:
-
-            total_edge += 1
-            if pred_head == real_head and dep != model.words_to_indices['<PAD>']: head_matches += 1
+            if dep != model.words_to_indices['<PAD>']:
+                total_edge += 1
+                if pred_head == real_head: head_matches += 1
 
 
         for pred_label, real_label in comparison_label:
 
-            total_label += 1
-            if pred_label == real_label and real_label != RELATIONS_TO_INDICES['<null>']: label_matches += 1
+
+            if real_label != RELATIONS_TO_INDICES['<null>']:
+                total_label += 1
+                if pred_label == real_label: label_matches += 1
 
 
     print(f"Attachment label: {label_matches/total_label}")
     print(f"Attachment heads: {head_matches/total_edge}")
+
+
+def train_epoch(model, optimizer, loss_fun, dataloader):
+
+    for batch in dataloader:
+        edge_scorer_results, edge_label_results = model(batch, train=True)
+
+        edge_scorer_results_swapped = torch.swapaxes(edge_scorer_results, 1, 2)
+        edge_label_results_swapped = torch.swapaxes(edge_label_results, 1, 2)
+
+        word_level_batch = batch[0]
+        target_edge_scorer = word_level_batch[:, 2, :]
+        target_edge_labeller = word_level_batch[:, 3, :]
+        loss_scorer = loss_fun(edge_scorer_results_swapped, target_edge_scorer)
+        loss_labeller = loss_fun(edge_label_results_swapped, target_edge_labeller)
+
+        total_loss = loss_scorer + loss_labeller
+        ic(total_loss)
+        total_loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+
+
+def train(model, optimizer, loss_fun, dataset, num_epochs):
+
+    for epoch in range(num_epochs):
+        print(f"{epoch+1}")
+        dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=69)
+        train_epoch(model, optimizer, loss_fun, dataloader)
+        if epoch%15 == 0:
+            test_path = '../data/UD_English-Atis/en_atis-ud-test.conllu'
+            test_model(test_path)
+        print("-------")
+        torch.save(model, GRAND_MODEL_PATH)
+
+def train_model(train_path, num_epochs):
+    train_dataset = Dataset(from_vocab=False, file_path=train_path, make_character_dataset=True)
+    train_dataset.load_pretrained_embeddings(PRETRAINED_EMBEDDING_FILE)
+
+    pos_tagger = torch.load(POS_MODEL_PATH)
+
+    model = Parser(400, 100,
+                    len(train_dataset.vocab), 100,
+                    200, 100, 18,
+                    pos_tagger,
+                    100,
+                    train_dataset.pretrained_embedding_weights,
+                    len(train_dataset.character_dataset.character_vocab),
+                    train_dataset.character_dataset.character_vocab,
+                    train_dataset.character_dataset.character_to_indices,
+                    train_dataset.vocab,
+                    train_dataset.words_to_indices).to(DEVICE)
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+    loss_fun = torch.nn.CrossEntropyLoss()
+
+    train(model, optimizer, loss_fun, train_dataset, num_epochs)
+
+
+# train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
+# train_model(train_path, 150)
+
+
 
 test_path = '../data/UD_English-Atis/en_atis-ud-test.conllu'
 test_model(test_path)
