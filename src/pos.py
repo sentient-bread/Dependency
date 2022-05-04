@@ -94,7 +94,10 @@ def train(model, optimizer, loss_fun, dataset, num_epochs, xpos=False):
     dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=BATCH_SIZE)
     train_epoch(model, optimizer, loss_fun, dataloader, xpos)
     print("-------")
-    torch.save(model, POS_MODEL_PATH)
+    if (xpos):
+      torch.save(model, XPOS_MODEL_PATH)
+    else:
+      torch.save(model, POS_MODEL_PATH)
 
 
 def train_POS(train_path, num_epochs, xpos=False):
