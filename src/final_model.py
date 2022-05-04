@@ -252,11 +252,11 @@ def train_model(train_path, num_epochs, pos_model_path, model_path, test_path, p
 
 # train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
 # train_path = '../data/hindi/hi_hdtb-ud-train.conllu'
-train_path = '../data/sanskrit/sa_vedic-ud-train.conllu'
+# train_path = '../data/sanskrit/sa_vedic-ud-train.conllu'
 
 # test_path = '../data/UD_English-Atis/en_atis-ud-test.conllu'
 # test_path = '../data/hindi/hi_hdtb-ud-test.conllu'
-test_path = '../data/sanskrit/sa_vedic-ud-test.conllu'
+# test_path = '../data/sanskrit/sa_vedic-ud-test.conllu'
 # train_model(train_path, 50, POS_MODEL_PATH, GRAND_MODEL_PATH, True)
 # train_model(train_path, 50, POS_MODEL_PATH_HINDI, GRAND_MODEL_PATH_HINDI, False)
 # train_model(train_path, 50, POS_MODEL_PATH_SANSKRIT, GRAND_MODEL_PATH_SANSKRIT, test_path, False)
@@ -264,4 +264,4 @@ test_path = '../data/sanskrit/sa_vedic-ud-test.conllu'
 
 
 
-test_model(test_path, GRAND_MODEL_PATH_SANSKRIT, False)
+# test_model(test_path, GRAND_MODEL_PATH_SANSKRIT, False)
