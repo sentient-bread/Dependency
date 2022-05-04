@@ -21,8 +21,8 @@ class Parser(nn.Module):
                 num_pos_tags,
                 pos_tagger,
                 character_embedding_dimension,
-                pretrained_embedding_weights,
                 character_vocab_size,
+                pretrained_embedding_weights=None,
                 character_vocab=None,
                 character_to_indices=None,
                 vocab=None,
@@ -49,7 +49,11 @@ class Parser(nn.Module):
 
         self.holistic_embedding = nn.Embedding(vocab_size, word_embedding_dimension)
 
-        self.pretrained_embedding_layer = nn.Embedding.from_pretrained(pretrained_embedding_weights)
+        if pretrained_embedding_weights is not None:
+            self.pretrained_embedding_layer = nn.Embedding.from_pretrained(pretrained_embedding_weights)
+        else:
+            self.pretrained_embedding_layer = None
+
 
         self.pos_embeddings = nn.Embedding.from_pretrained(pos_tagger.get_W_transpose_matrix().detach())
         ic(self.pos_embeddings.num_embeddings)
@@ -82,12 +86,19 @@ class Parser(nn.Module):
         character_level_batch = batch[1]
 
         holistic_embeddings = self.holistic_embedding(word_level_batch[:, WORDS, :])
-        pretrained_embeddings = self.pretrained_embedding_layer(word_level_batch[:, WORDS, :])
+        if self.pretrained_embedding_layer is not None:
+            pretrained_embeddings = self.pretrained_embedding_layer(word_level_batch[:, WORDS, :])
         character_level_embeddings = self.character_level_model(character_level_batch)
         # ideally [batch_size x num_words x embedding_dim]
         # all three have the same dimensions (ideally)
         # and represent three different representations of the same thing
-        final_embeddings = torch.add(torch.add(holistic_embeddings, pretrained_embeddings), character_level_embeddings)
+
+        final_embeddings = None
+        if self.pretrained_embedding_layer is not None:
+            final_embeddings = torch.add(torch.add(holistic_embeddings, pretrained_embeddings), character_level_embeddings)
+
+        else:
+            final_embeddings = torch.add(hollistic_embeddings, character_level_embeddings)
 
         pos_embeddings = None
         heads_indices = None
@@ -219,8 +230,8 @@ def train_model(train_path, num_epochs):
                     200, 100, 18,
                     pos_tagger,
                     100,
-                    train_dataset.pretrained_embedding_weights,
                     len(train_dataset.character_dataset.character_vocab),
+                    train_dataset.pretrained_embedding_weights,
                     train_dataset.character_dataset.character_vocab,
                     train_dataset.character_dataset.character_to_indices,
                     train_dataset.vocab,
@@ -233,8 +244,8 @@ def train_model(train_path, num_epochs):
     train(model, optimizer, loss_fun, train_dataset, num_epochs)
 
 
-# train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
-# train_model(train_path, 150)
+train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
+train_model(train_path, 150)
 
 
 
