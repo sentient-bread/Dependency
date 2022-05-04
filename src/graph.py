@@ -2,6 +2,7 @@ from edgescorer import EdgeScorer
 from pos import POSTag
 from copy import deepcopy
 from math import inf
+import torch
 
 def get_cycles(mst):
     """
@@ -120,38 +121,58 @@ def get_MST(graph, scores):
 
     return mst
 
-def create_graph(sentence):
+def create_graph(parser, tokens):
     """
     Accepts a list of indices
     including <BOS> but not <EOS>
     """
-    scores = self.edgescorer(sentence)
+    indices = torch.tensor([parser.index(tok) for tok in tokens])
+    pos = torch.tensor([0 for _ in indices])
+    heads = torch.tensor([0 for _ in indices])
+    labels = torch.tensor([0 for _ in indices])
+
+    word_level = torch.stack([indices, pos, heads, labels], dim=0).unsqueeze(0)
+
+    max_word_len = max([len(tok) for tok in tokens])
+    char_level = []
+    for tok in tokens:
+      idx = [parser.character_level_model.character_to_indices[c] if c in parser.character_level_model.character_to_indices.keys() else len(parser.character_level_model.character_vocab)-2 for c in tok]
+      idx = [len(parser.character_level_model.character_vocab)-2] * (max_word_len-len(tok)) + idx
+    
+      char_level.append(idx)
+    
+    char_level = torch.tensor(char_level).unsqueeze(0)
+
+    scores, labels = parser([word_level, char_level])
+    tags = parser.pos_tagger(indices)
     # Now scores[i][j] = probability that
     # i is the head of j
 
-    pad_index = len(self.edgescorer.vocab) - 2
+    #pad_index = len(self.edgescorer.vocab) - 2
     # The number representing <PAD> in the sentence
 
-    try:
-        remove_index = sentence.tolist().index(pad_index)
-        # The index in the sentence from which padding
-        # has happened .: which has to be ignored
-        scores = scores[:remove_index, :remove_index]
-        # Stripping scores matrix to remove pad-pad dependencies
-    except ValueError: pass
+    #try:
+    #    remove_index = sentence.tolist().index(pad_index)
+    #    # The index in the sentence from which padding
+    #    # has happened .: which has to be ignored
+    #    scores = scores[:remove_index, :remove_index]
+    #    # Stripping scores matrix to remove pad-pad dependencies
+    #except ValueError: pass
     # If the sentence has no pad_index
 
-    scores = scores.transpose(0,1).tolist()
+    scores = scores[0]
+    labels = labels[0]
+    scores = scores.tolist()
     # Now scores[i][j] = probability that
     # j is a head of i
 
-    graph = [ [] ]*(len(sentence))
+    graph = [ [] ]*(len(tokens))
     # Initialised with [] as a placeholder
 
-    for i in range(1, len(sentence)):
-        graph[i] = [0] + [j for j in range(1, len(sentence)) if j != i]
+    for i in range(1, len(tokens)):
+        graph[i] = [0] + [j for j in range(1, len(tokens)) if j != i]
     # graph[i] = list of nodes j s.t. there is an edge j -> i
 
     MST = get_MST(graph, scores)
     
-    return MST
+    return MST, labels.argmax(dim=1), tags.argmax(dim=1)

@@ -77,6 +77,11 @@ class Parser(nn.Module):
                                             words_to_indices,
                                             RELATIONS_TO_INDICES,
                                             UNIVERSAL_DEPENDENCY_LABELS)
+    def index(self, word):
+        if word in self.words_to_indices.keys():
+            return self.words_to_indices[word]
+        else:
+            return self.words_to_indices['<UNK>']
 
     def forward(self, batch, train=False):
 
