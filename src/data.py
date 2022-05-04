@@ -11,7 +11,7 @@ PAD_DEPENDENCY = 0
 class Dataset(torch.utils.data.Dataset):
   def __init__(self, from_vocab=False, file_path=None, vocab=None, words_to_indices=None, make_character_dataset=False):
     # cheap constructor overloading
-
+    self.pretrained_embedding_weights = None
     self.tags_to_indices = {tag: index for index, tag in enumerate(
                               ['ADJ',   'ADP', 'ADV',  'AUX',  'CCONJ', 'DET', 'INTJ',
                                'NOUN',  'NUM', 'PART', 'PRON', 'PROPN', 'PUNCT',
