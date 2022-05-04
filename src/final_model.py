@@ -112,7 +112,7 @@ class Parser(nn.Module):
         if train:
             heads_indices = word_level_batch[:, HEADS, :]
         else:
-            heads_indices = edge_scores.argmax(dim=1)
+            heads_indices = edge_scores.argmax(dim=2)
 
         edge_labels = self.edge_labeller.hidden_states_treatment(lstm_outputs, last_hidden_state, last_cell_state, heads_indices)
 
@@ -135,7 +135,7 @@ def train_epoch(model, optimizer, loss_fun, dataloader):
         loss_scorer = loss_fun(edge_scorer_results_swapped, target_edge_scorer)
         loss_labeller = loss_fun(edge_label_results_swapped, target_edge_labeller)
 
-        total_loss = loss_scorer + loss_labeller
+        total_loss = loss_scorer + 2 * loss_labeller
         ic(total_loss)
         total_loss.backward()
         optimizer.step()
@@ -177,7 +177,7 @@ def train_model(train_path, num_epochs):
 
 
 # train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
-# train_model(train_path, 10)
+# train_model(train_path, 50)
 
 
 def test_model(test_path):
@@ -201,7 +201,7 @@ def test_model(test_path):
         ic(target_labels.shape)
 
         edge_scores, edge_label = model(batch)
-        ic(edge_label.shape)
+        ic(edge_label.shape, edge_scores.shape)
         edge_pred = edge_scores.argmax(dim=2)
 
         label_pred = edge_label.argmax(dim=2)
@@ -227,7 +227,7 @@ def test_model(test_path):
 
             total_label += 1
             if pred_label == real_label: label_matches += 1
-    
+
 
     print(f"Attachment label: {label_matches/total_label}")
     print(f"Attachment heads: {head_matches/total_edge}")
