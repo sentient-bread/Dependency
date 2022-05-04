@@ -5,6 +5,8 @@ POS_MODEL_PATH = "../models/pos_model.pth"
 EDGESCORER_MODEL_PATH = "../models/edgescorer_model.pth"
 CHARACTER_MODEL_PATH = "../models/character_model.pth"
 EDGELABELLER_MODEL_PATH = "../models/edgelabeller_model.pth"
+GRAND_MODEL_PATH = "../models/grand_model.pth"
+PRETRAINED_EMBEDDING_FILE = "../embeddings/glove.6B.100d.txt"
 
 UNIVERSAL_DEPENDENCY_LABELS = [
     "<null>", # --
