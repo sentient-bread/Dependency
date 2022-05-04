@@ -12,6 +12,17 @@ author: |
 # Introduction
 We have implemented a graph-based dependency parser according to Stanford's submission for the 2017 CoNLL shared task. It uses a POS tagger and a biaffine edge scorer and edge labeller.
 
+# Literature Review
+Dependency parsing is a well-studied grammatical formalism, and one of the major ones (alongside, say context-free grammars). However, being syntactico-semantic, rule-based methods have had comparatively less success in this approach of parsing as compared to CFGs.
+
+Neural methods have followed two main approaches: transition- and graph-based parsing.
+
+Transition-based parsing methods, like the one outlined [**here**](https://aclanthology.org/P09-1040.pdf), treat the input sequence as a stream and continuously identify edges. They tend to struggle with long-distance dependencies and non-projectivity.
+
+Graph-based parsing methods, like the one outlined in [**our reference**](https://aclanthology.org/K17-3002.pdf), find the probability that each word is each other word's head (or "parent"), and using these scores, identify the best possible parse tree.  
+Our reference builds mainly on [**this paper**](https://arxiv.org/pdf/1611.01734.pdf).
+
+# The Model
 ## Word Embeddings
 The word embeddings are created by summing up three vectors for each word: a pre-trained embedding, an ordinary trained embedding, and a character-level embedding.
 
