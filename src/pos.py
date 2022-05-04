@@ -84,17 +84,17 @@ def train_epoch(model, optimizer, loss_fun, dataloader):
     optimizer.step()
     optimizer.zero_grad()
 
-def train(model, optimizer, loss_fun, dataset, num_epochs):
+def train(model, optimizer, loss_fun, dataset, num_epochs, pos_model_path):
 
   for epoch in range(num_epochs):
     print(f"{epoch+1}")
     dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=BATCH_SIZE)
     train_epoch(model, optimizer, loss_fun, dataloader)
     print("-------")
-    torch.save(model, POS_MODEL_PATH)
+    torch.save(model, pos_model_path)
 
 
-def train_POS(train_path, num_epochs):
+def train_POS(train_path, num_epochs, pos_model_path):
 
   train_dataset = Dataset(False, file_path=train_path)
   # test_dataloader = torch.utils.data.DataLoader(test_dataset, shuffle=True, batch_size=BATCH_SIZE)
@@ -114,7 +114,7 @@ def train_POS(train_path, num_epochs):
 
   loss_fun = torch.nn.CrossEntropyLoss()
 
-  train(model, optimizer, loss_fun, train_dataset, num_epochs)
+  train(model, optimizer, loss_fun, train_dataset, num_epochs, pos_model_path)
   # train_epoch(model, None, None, test_dataloader)
 
 
@@ -184,14 +184,22 @@ def all_metrics(model, test_file_path):
 
 
 # train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
+# train_path = '../data/hindi/hi_hdtb-ud-train.conllu'
+# train_path = '../data/sanskrit/sa_vedic-ud-train.conllu'
 
-# train_POS(train_path, 20)
+# train_POS(train_path, 20, POS_MODEL_PATH)
+# train_POS(train_path, 20, POS_MODEL_PATH_HINDI)
+# train_POS(train_path, 20, POS_MODEL_PATH_SANSKRIT)
 
-load_model = torch.load(POS_MODEL_PATH).to(DEVICE)
+# load_model = torch.load(POS_MODEL_PATH).to(DEVICE)
+# load_model = torch.load(POS_MODEL_PATH_HINDI).to(DEVICE)
+# load_model = torch.load(POS_MODEL_PATH_SANSKRIT).to(DEVICE)
 
 # ic(load_model.vocab)
 
-test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
+# test_file_path = "../data/UD_English-Atis/en_atis-ud-test.conllu"
+# test_file_path = '../data/hindi/hi_hdtb-ud-test.conllu'
+# test_file_path = '../data/sanskrit/sa_vedic-ud-test.conllu'
 
 # test_model(load_model, test_file_path)
 
