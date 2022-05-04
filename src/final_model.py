@@ -77,6 +77,11 @@ class Parser(nn.Module):
                                             words_to_indices,
                                             RELATIONS_TO_INDICES,
                                             UNIVERSAL_DEPENDENCY_LABELS)
+    def index(self, word):
+        if word in self.words_to_indices.keys():
+            return self.words_to_indices[word]
+        else:
+            return self.words_to_indices['<UNK>']
 
     def forward(self, batch, train=False):
 
@@ -244,10 +249,10 @@ def train_model(train_path, num_epochs):
     train(model, optimizer, loss_fun, train_dataset, num_epochs)
 
 
-train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
-train_model(train_path, 150)
-
-
-
-test_path = '../data/UD_English-Atis/en_atis-ud-test.conllu'
-test_model(test_path)
+#train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
+#train_model(train_path, 150)
+#
+#
+#
+#test_path = '../data/UD_English-Atis/en_atis-ud-test.conllu'
+#test_model(test_path)

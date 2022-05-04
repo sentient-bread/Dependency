@@ -9,30 +9,25 @@ from final_model import Parser
 from data import Dataset
 from graph import create_graph
 
-model = torch.load(GRAND_MODEL_PATH)
+model = torch.load(GRAND_MODEL_PATH, map_location=torch.device('cpu'))
 dataset = Dataset(file_path="../data/UD_English-Atis/en_atis-ud-train.conllu",
                   make_character_dataset=True)
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=42)
 character_to_indices = model.character_level_model.character_to_indices
 
-ic(next(iter(dataloader))[0].shape)
-ic(next(iter(dataloader))[1].shape)
+tags_list = ['ADJ',   'ADP', 'ADV',  'AUX',  'CCONJ', 'DET', 'INTJ',                     'NOUN',  'NUM', 'PART', 'PRON', 'PROPN', 'PUNCT',                           'SCONJ', 'SYM', 'VERB', 'X', 'NULL']
 
 sentence = input("Enter a sentence: ")
 tokens = sentence.strip().split()
+tokens.insert(0,'<BOS>')
 
-indices = torch.tensor([model.index(tok) for tok in tokens]).to(DEVICE)
-pos = torch.tensor([0 for _ in tokens]).to(DEVICE)
-heads = torch.tensor([0 for _ in tokens]).to(DEVICE)
-labels = torch.tensor([0 for _ in tokens]).to(DEVICE)
+mst, labels, tags = create_graph(model, tokens)
 
-word_level = torch.stack([indices, pos, heads, labels], dim=0).unsqueeze(0)
-# unsqueeze for batch
+print("IDX\tWORD\tPOS\tHEAD\tRELN")
+for node in range(1, len(tokens)):
+  head = mst[node]
+  word = tokens[node]
+  tag = tags_list[tags[node]]
+  label = UNIVERSAL_DEPENDENCY_LABELS[labels[node]]
+  print(f"{node}\t{word}\t{tag}\t{head}\t{label}")
 
-max_word_len = max([len(tok) for tok in tokens])
-char_level = torch.tensor(model.character_level_model.dataset.word_index_list_to_character_list(
-        indices.tolist(), max_word_len
-        )).to(DEVICE)
-
-ic(char_level)
-ic(char_level.shape)
