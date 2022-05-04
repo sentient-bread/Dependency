@@ -37,9 +37,10 @@ During training, the heads are found by simply taking the highest-probability he
 
 # Results
 ## POS Tagger
-The results of the UPOS tagger, trained and tested on the English Atis datasets, are as follows.
+The results of the POS tagger, trained and tested on the English Atis datasets, are as follows.
 
-### Hidden Size of $50 \times 2$
+### English
+#### Hidden Size of $50 \times 2$
 ```
 Overall
               precision    recall  f1-score   support
@@ -64,7 +65,7 @@ Overall
 weighted avg       0.99      0.99      0.99     19924
 ```
 
-### Hidden Size of $200 \times 2$
+#### Hidden Size of $200 \times 2$
 (note: this is as prescribed by the paper)
 ```
 Overall
@@ -90,14 +91,73 @@ Overall
 weighted avg       0.99      0.99      0.99     19924
 ```
 
-## Parser
-The edge scorer achieves an unlabelled attachment score (UAS) of 98.9%.
+### Hindi
+```
+Overall
+              precision    recall  f1-score   support
 
-The edge labeller achieves a labelled attachement score (LAS) of 63.0%.
+         ADJ       0.92      0.86      0.89      2043
+         ADP       0.99      1.00      0.99      7544
+         ADV       0.89      0.86      0.87       304
+         AUX       0.97      0.98      0.97      2596
+       CCONJ       0.98      1.00      0.99       635
+         DET       0.95      0.96      0.96       745
+        NOUN       0.91      0.91      0.91      8036
+        NULL       1.00      1.00      1.00     77398
+         NUM       0.96      0.85      0.90       693
+        PART       0.99      0.96      0.98       677
+        PRON       0.98      0.97      0.97      1372
+       PROPN       0.84      0.88      0.86      4438
+       PUNCT       1.00      1.00      1.00      2420
+       SCONJ       0.98      0.99      0.99       655
+        VERB       0.96      0.94      0.95      3263
+           X       0.21      0.33      0.26         9
+
+    accuracy                           0.98    112828
+   macro avg       0.91      0.90      0.91    112828
+weighted avg       0.98      0.98      0.98    112828
+```
+
+### Sanskrit
+```
+Overall
+              precision    recall  f1-score   support
+
+         ADJ       0.44      0.33      0.37       870
+         ADV       0.92      0.87      0.90      1084
+         AUX       0.80      0.44      0.57        90
+       CCONJ       0.99      0.96      0.98       152
+         DET       0.88      0.15      0.25        48
+        NOUN       0.77      0.74      0.75      3074
+        NULL       1.00      1.00      1.00    226008
+         NUM       0.86      0.28      0.42        89
+        PART       0.99      0.99      0.99       785
+        PRON       0.92      0.88      0.90      1443
+       SCONJ       0.86      0.82      0.84        97
+        VERB       0.62      0.82      0.71      1940
+
+    accuracy                           0.99    235680
+   macro avg       0.84      0.69      0.72    235680
+weighted avg       0.99      0.99      0.99    235680
+```
+
+## Parser
+### English
+LAS: 0.9492089925062448
+UAS: 0.9685863874345549
+
+### Hindi
+LAS: 0.9090909090909091
+UAS: 0.9162303664921466
+
+### Sanskrit
+LAS: 0.4508990318118949
+UAS: 0.5780141843971631
 
 # Analysis
 ## POS Tagger
-We note from both UPOS taggers that the recall of adverbs and numbers is low. This means that the model was unable to identify a significant fraction of adverbs and numbers.
+### English
+We note from both English POS taggers that the recall of adverbs and numbers is low. This means that the model was unable to identify a significant fraction of adverbs and numbers.
 
 One factor common to both these parts of speech is the relatively small number of samples available – 76 for adverbs and 127 for numbers (as compared to, say, 995 for nouns and 1434 for adpositions). However, interjections and particles also have comparably low counts.
 
@@ -106,4 +166,39 @@ On the other hand, adverbs cannot be decided so easily. For example, *good* and 
 
 As a side effect of this, we expect the precision of adjectives to drop (due to the adverbs wrongly classified as adjectives). This is in fact what we observe, with the precision of adverbs being the next lowest value in the above table.
 
+### Cross-Linguistic
+The Hindi POS tagger (compared to English) achieves comparable, but not equal results. Many parts of speech have low recall – adverbs, numbers and adjectives among them. In addition, proper nouns have low precision as well.
+
+The Sanskrit POS tagger performs poorly on all parts of speech except precision of conjunctions, determiners, particles and pronouns, and the recall of conjunctions, particles and pronouns.  
+All these parts of speech constitute function words, which means that lexical cues enable us to identify them.  
+Sanskrit's morphology is such that a single word may double as an adverb, adjective, or noun. Thus, these parts of speech are hard to identify. The model seems to be biased towards marking them as adverbs, giving them high precision.  
+The lack of word-order cues may also be a factor in the poor tagging.
+
 ## Parser
+The model performs the best on English, achieving an attachment score of approximately 95% (both labelled and unlabelled). We hypothesis that this is because of English's fixed word order and lack of morphological complexity.
+
+Our justification for this explanation lies in the attachment scores of Hindi (which has a slightly freer word order and greater morphological complexity) and Sanskrit (which has a much freer word order and greater morphological complexity).
+The model achieves approximately 90% attachment in Hindi, but is unable to cross 60% (unlabelled) in Sanskrit.
+
+The model trained on Mandarin, notably, performs equally poorly, achieving no more than 59% unlabelled attachment. We were unable to explain this drop in performance on a language even more fixed word-order and isolating than English.
+
+## Overall Model
+In an attempt towards interpretability, we attempted to find how important the POS tagger was to the overall model. We partially trained the POS tagger and then recorded the unlabelled attachment score of an edge-scorer trained on the "bad" POS tagger. Our results are as follows:
+
+| POS Tagger Accuracy | UAS   | Num_Epochs |
+| :---:               | :---: | :---:      |
+| 15.2%               | 90.8% | 20 |
+| 52.7%               | 90.2% | 24 |
+| 81.1%               | 89.6% | 24 |
+| 86.8%               | 90.4% | 16 |
+| 92%                 | 90.3% | 11 |
+| 96.5%               | 90.9% | 14 |
+
+Surprisingly, the accuracy of the POS tagger does not significantly affect the accuracy of the edge scorer. However, it does seem to affect how fast it trains.
+
+A natural question to ask now is whether the inaccurate POS tagger's outputs are even used by the model somehow, or completely ignored. To test this, we carried out two experiments: we ran the edge scorer *without* a POS tagger, and we replaced the bad POS tagger of a trained edge scorer with a good one.
+
+The edge scorer without a POS tagger achieved 90.9% UAS. This led us to believe that the inaccurate POS taggers' results are being ignored by the previous edge scorers.  
+However, an edge scorer trained with a 13.2%-accurate POS tagger achieved 91.5% accuracy. When this POS tagger was replaced with a 98.6%-accurate one, its performance dropped to 68.1%.
+
+We were then forced to the conclusion that the model somehow learns to make use of the POS tagger's poor predictions – in a sense, the POS tagger has its own syntactic "theory", which allows it to achieve comparable results to ours in terms of dependency parsing.
