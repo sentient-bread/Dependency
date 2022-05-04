@@ -25,6 +25,7 @@ class Dataset(torch.utils.data.Dataset):
       self.vocab = []
       self.freqs = {}
       self.words_to_indices = {}
+      self.xpos_vocab = []
 
 
     self.file_path = file_path
@@ -35,6 +36,7 @@ class Dataset(torch.utils.data.Dataset):
     postags = []
     heads = []
     relations = []
+    xpostags = []
 
     self.length_longest_sequence = 0
 
@@ -58,11 +60,12 @@ class Dataset(torch.utils.data.Dataset):
         if (len(line) > 0):
           columns = line.split('\t')
 
-          WORD_INDEX, POS_INDEX, HEAD_INDEX, RELATION_INDEX = 1, 3, 6, 7
+          WORD_INDEX, POS_INDEX, HEAD_INDEX, RELATION_INDEX, XPOS_INDEX = 1, 3, 6, 7, 4
           words.append(columns[WORD_INDEX])
           postags.append(columns[POS_INDEX])
           heads.append(int(columns[HEAD_INDEX]))
           relations.append(columns[RELATION_INDEX])
+          xpostags.append(columns[XPOS_INDEX])
 
           if not from_vocab:
             try: freqs[columns[1]] += 1
@@ -74,16 +77,19 @@ class Dataset(torch.utils.data.Dataset):
           postags.insert(0, 'NULL')
           heads.insert(0, 0)
           relations.insert(0, "<null>")
+          xpostags.insert(0, "<null>")
           # This -1 does NOT mean that the head of <BOS> is the last word
           # in the sentence. It means that the head of <BOS> is itself.
 
-          dataset.append((words, postags, heads, relations))
+          dataset.append((words, postags, heads, relations, xpostags))
           if not from_vocab:
             self.vocab += words
+            self.xpos_vocab += xpostags
           words = []
           postags = []
           heads = []
           relations = []
+          xpostags = []
 
     self.length_longest_sequence += 1
 
@@ -95,22 +101,25 @@ class Dataset(torch.utils.data.Dataset):
       self.vocab = list(set(self.vocab))
       self.vocab = list(filter(lambda x: freqs[x] > 0, self.vocab))
       self.vocab = sorted(self.vocab)
+      self.xpos_vocab = list(set(self.xpos_vocab))
 
       self.vocab += metatokens
       # last three indices are for <BOS>, <PAD> and <UNK> respectively
 
       self.freqs = freqs
       self.words_to_indices = {word: index for index, word in enumerate(self.vocab)}
+      self.xpos_to_indices = {tag: index for index, tag in enumerate(self.xpos_vocab)}
 
-    for (words, tags, heads, relations) in dataset:
+    for (words, tags, heads, relations, xpostags) in dataset:
       word_indices = [self.index(word) for word in words]
       tag_indices = [self.tags_to_indices[tag] for tag in tags]
       relation_indices = [RELATIONS_TO_INDICES[relation] for relation in relations]
+      xpos_indices = [self.xpos_to_indices[tag] for tag in xpostags]
       # converts sentence indices to vocabulary indices
 
       # heads already contains correct indices, because when <BOS>
       # was added, 1-based indexing became 0-based, as needed.
-      self.dataset.append((word_indices, tag_indices, heads, relation_indices))
+      self.dataset.append((word_indices, tag_indices, heads, relation_indices, xpos_indices))
 
     self.make_character_dataset = make_character_dataset
     self.character_dataset = DatasetCharacter(word_vocab=self.vocab,
@@ -180,6 +189,7 @@ class Dataset(torch.utils.data.Dataset):
     index_of_pos_tags = 1
     index_of_tree_info = 2
     index_of_relations = 3
+    index_of_xpos_tags = 4
 
     to_ret_padded[index_of_sentence] = torch.nn.functional.pad(
                                   to_ret_tensor[index_of_sentence],
@@ -203,6 +213,11 @@ class Dataset(torch.utils.data.Dataset):
                                               (0, amount_to_pad),
                                               "constant",
                                               RELATIONS_TO_INDICES["<null>"],
+    )
+    to_ret_padded[index_of_xpos_tags] = torch.nn.functional.pad(to_ret_tensor[index_of_xpos_tags],
+                                              (0, amount_to_pad),
+                                              "constant",
+                                              self.xpos_to_indices["<null>"]
     )
     if self.make_character_dataset:
       character_tensor = self.character_dataset.__getitem__(index)
