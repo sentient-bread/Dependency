@@ -32,13 +32,13 @@ class CharacterModel(nn.Module):
 
     def forward(self, batch):
         #ic(batch)
-        ic(batch.shape)
+        # ic(batch.shape)
         # ic(batch.size()) # Gives: [batch_size x num_word x num_characters]
         embedding_vectors = self.embedding_layer(batch)
         # ic(embedding_vectors.shape) # batch_size x num_words x num_characters x embedding_size
 
 
-        ic(embedding_vectors.view(embedding_vectors.shape[0]*embedding_vectors.shape[1], embedding_vectors.shape[2], embedding_vectors.shape[3]).shape)
+        #ic(embedding_vectors.view(embedding_vectors.shape[0]*embedding_vectors.shape[1], embedding_vectors.shape[2], embedding_vectors.shape[3]).shape)
         lstm_inputs = embedding_vectors.view(embedding_vectors.shape[0]*embedding_vectors.shape[1], 
                                             embedding_vectors.shape[2], 
                                             embedding_vectors.shape[3])

@@ -50,8 +50,8 @@ class EdgeLabeller(nn.Module):
 
     # The dimension in which we index will be the second dimension (1), i.e.
     # along each sentence in the batch.
-    ic(H_head_raw.shape)
-    ic(heads_indices.shape)
+    # ic(H_head_raw.shape)
+    # ic(heads_indices.shape)
 
     # Heads indices has to be transformed into the correct dimensions for the torch.gather
     # function, which will do the rearrangement we need.
@@ -79,15 +79,15 @@ class EdgeLabeller(nn.Module):
     # the first two parameters are -1 because we do not want to affect the size of
     # the first two dimensions
 
-    ic(heads_indices_expanded.shape)
+    # ic(heads_indices_expanded.shape)
     H_head = torch.gather(H_head_raw, 1, heads_indices_expanded)
 
     # The first term intuitively relates to the probability of a specific label
     # given the interaction between *both* the head and the label. This is the
     # U^(rel) matrix in the paper.
-    ic(self.both_weight_rel.state_dict()["weight"].shape)
+    # ic(self.both_weight_rel.state_dict()["weight"].shape)
     Hh_Ur_Hd = self.both_weight_rel(H_head, H_dep)
-    ic(Hh_Ur_Hd.shape)
+    # ic(Hh_Ur_Hd.shape)
 
     # The second term intuitively relates to the probability of a specific
     # label given *either* the head or the label's information. This it the
@@ -95,10 +95,10 @@ class EdgeLabeller(nn.Module):
 
     # The dimension we concatenate along are the embeddings themselves.
     Wr_Hr_Hd = self.either_weight_rel(torch.cat((H_head, H_dep), dim=2))
-    ic(Wr_Hr_Hd.shape)
+    # ic(Wr_Hr_Hd.shape)
 
     scores = Hh_Ur_Hd + Wr_Hr_Hd
-    ic(scores.shape)
+    # ic(scores.shape)
     return scores
 
   def forward(self, batch):
