@@ -36,7 +36,12 @@ class Parser(nn.Module):
         self.words_to_indices = words_to_indices
         self.vocab_size = vocab_size
 
-        self.pos_tagger: POSTag = pos_tagger
+        self.pos_tagger: POSTag = pos_tagger or POSTag(100, vocab_size, word_embedding_dimension, hidden_size, num_pos_tags)
+        if pos_tagger is None:
+            self.train_pos = True
+        else:
+            self.train_pos = False
+
         # get the separately trained pos tagger as a state variable
 
         self.character_level_model = CharacterModel(character_embedding_dimension,
@@ -55,7 +60,7 @@ class Parser(nn.Module):
             self.pretrained_embedding_layer = None
 
 
-        self.pos_embeddings = nn.Embedding.from_pretrained(pos_tagger.get_W_transpose_matrix().detach())
+        self.pos_embeddings = nn.Embedding.from_pretrained(self.pos_tagger.get_W_transpose_matrix().detach())
         ic(self.pos_embeddings.num_embeddings)
         self.common_lstm = nn.LSTM(word_embedding_dimension + pos_embedding_dimension, hidden_size,
                         bidirectional=True, batch_first=True)
@@ -107,10 +112,13 @@ class Parser(nn.Module):
 
         pos_embeddings = None
         heads_indices = None
+        pos_distributions = None
 
         if train:
             pos_embeddings = self.pos_embeddings(word_level_batch[:, 1, :])
             heads_indices = word_level_batch[:, HEADS, :]
+            if self.train_pos:
+                pos_distributions = self.pos_tagger.semiforward(final_embeddings)
 
         else:
             pos_distributions = self.pos_tagger(word_level_batch[:, 0, :])
@@ -132,7 +140,7 @@ class Parser(nn.Module):
 
         edge_labels = self.edge_labeller.hidden_states_treatment(lstm_outputs, last_hidden_state, last_cell_state, heads_indices)
 
-        return (edge_scores, edge_labels)
+        return (edge_scores, edge_labels, pos_distributions)
 
 
 def test_model(test_path, model_path, pretrained_embeddings=False):
@@ -157,7 +165,7 @@ def test_model(test_path, model_path, pretrained_embeddings=False):
         target_labels = word_level_batch[:, 3, :]
         ic(target_labels.shape)
 
-        edge_scores, edge_label = model(batch)
+        edge_scores, edge_label, _ = model(batch)
         ic(edge_label.shape, edge_scores.shape)
         edge_pred = edge_scores.argmax(dim=2)
 
@@ -186,8 +194,9 @@ def test_model(test_path, model_path, pretrained_embeddings=False):
             if real_label != RELATIONS_TO_INDICES['<null>']:
                 total_label += 1
                 if pred_label == real_label: label_matches += 1
-
-
+    model.pos_tagger.words_to_indices = model.words_to_indices
+    model.pos_tagger.vocab = model.vocab
+    all_metrics(model.pos_tagger, test_path)
     print(f"Attachment label: {label_matches/total_label}")
     print(f"Attachment heads: {head_matches/total_edge}")
 
@@ -195,12 +204,17 @@ def test_model(test_path, model_path, pretrained_embeddings=False):
 def train_epoch(model, optimizer, loss_fun, dataloader):
 
     for batch in dataloader:
-        edge_scorer_results, edge_label_results = model(batch, train=True)
+        edge_scorer_results, edge_label_results, pos_distributions = model(batch, train=True)
 
         edge_scorer_results_swapped = torch.swapaxes(edge_scorer_results, 1, 2)
         edge_label_results_swapped = torch.swapaxes(edge_label_results, 1, 2)
 
         word_level_batch = batch[0]
+
+        pos_distributions_swapped = torch.swapaxes(pos_distributions, 1, 2)
+        loss_pos = loss_fun(pos_distributions_swapped, word_level_batch[:, 1, :])
+        loss_pos.backward(retain_graph=True)
+
         target_edge_scorer = word_level_batch[:, 2, :]
         target_edge_labeller = word_level_batch[:, 3, :]
         loss_scorer = loss_fun(edge_scorer_results_swapped, target_edge_scorer)
@@ -231,10 +245,21 @@ def train_model(train_path, num_epochs, pos_model_path, model_path, test_path, p
 
     pos_tagger = torch.load(pos_model_path)
 
+    # model = Parser(400, 100,
+    #                 len(train_dataset.vocab), 100,
+    #                 200, 100, 18,
+    #                 pos_tagger,
+    #                 100,
+    #                 len(train_dataset.character_dataset.character_vocab),
+    #                 train_dataset.pretrained_embedding_weights,
+    #                 train_dataset.character_dataset.character_vocab,
+    #                 train_dataset.character_dataset.character_to_indices,
+    #                 train_dataset.vocab,
+    #                 train_dataset.words_to_indices).to(DEVICE)
     model = Parser(400, 100,
                     len(train_dataset.vocab), 100,
                     200, 100, 18,
-                    pos_tagger,
+                    None,
                     100,
                     len(train_dataset.character_dataset.character_vocab),
                     train_dataset.pretrained_embedding_weights,
@@ -252,16 +277,15 @@ def train_model(train_path, num_epochs, pos_model_path, model_path, test_path, p
 
 # train_path = '../data/UD_English-Atis/en_atis-ud-train.conllu'
 # train_path = '../data/hindi/hi_hdtb-ud-train.conllu'
-# train_path = '../data/sanskrit/sa_vedic-ud-train.conllu'
+train_path = '../data/sanskrit/sa_vedic-ud-train.conllu'
 
 # test_path = '../data/UD_English-Atis/en_atis-ud-test.conllu'
 # test_path = '../data/hindi/hi_hdtb-ud-test.conllu'
-# test_path = '../data/sanskrit/sa_vedic-ud-test.conllu'
-# train_model(train_path, 50, POS_MODEL_PATH, GRAND_MODEL_PATH, True)
+test_path = '../data/sanskrit/sa_vedic-ud-test.conllu'
 # train_model(train_path, 50, POS_MODEL_PATH_HINDI, GRAND_MODEL_PATH_HINDI, False)
 # train_model(train_path, 50, POS_MODEL_PATH_SANSKRIT, GRAND_MODEL_PATH_SANSKRIT, test_path, False)
 
 
 
 
-# test_model(test_path, GRAND_MODEL_PATH_SANSKRIT, False)
+test_model(test_path, GRAND_MODEL_PATH_SANSKRIT, False)

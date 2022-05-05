@@ -56,6 +56,15 @@ class POSTag(nn.Module):
 
     return affine_layer_outputs
 
+  def semiforward(self, embedded):
+    lstm_outputs, (last_hidden_state, last_cell_state) = self.lstm(embedded)
+
+
+    classifier_outputs = self.classifier(lstm_outputs)
+    # MLP Classifier
+    affine_layer_outputs = self.w_layer(classifier_outputs)
+    return affine_layer_outputs
+
   def predict(self, batch):
 
     #affine_layer_output = self.forward(batch)
