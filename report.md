@@ -154,15 +154,15 @@ weighted avg       0.99      0.99      0.99    235680
 
 ## Parser
 ### English
-LAS: 0.9492089925062448
+LAS: 0.9492089925062448  
 UAS: 0.9685863874345549
 
 ### Hindi
-LAS: 0.9090909090909091
+LAS: 0.9090909090909091  
 UAS: 0.9162303664921466
 
 ### Sanskrit
-LAS: 0.4508990318118949
+LAS: 0.4508990318118949  
 UAS: 0.5780141843971631
 
 # Analysis
@@ -184,6 +184,66 @@ The Sanskrit POS tagger performs poorly on all parts of speech except precision 
 All these parts of speech constitute function words, which means that lexical cues enable us to identify them.  
 Sanskrit's morphology is such that a single word may double as an adverb, adjective, or noun. Thus, these parts of speech are hard to identify. The model seems to be biased towards marking them as adverbs, giving them high precision.  
 The lack of word-order cues may also be a factor in the poor tagging.
+
+Another experiment we carried out was to train the POS tagger on the summed word embeddings (rather than allowing it to train its own embeddings). This was done for English and Sanskrit.  
+Interestingly, it led to a significant drop in the performances of the POS tagger as well as the parser.
+
+The POS results for English and Sanskrit are as follows (respectively):
+```
+Overall
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.12      0.04       220
+         ADP       0.02      0.21      0.04      1434
+         ADV       0.00      0.01      0.00        76
+         AUX       0.00      0.00      0.00       256
+       CCONJ       0.00      0.00      0.00       109
+         DET       0.02      0.00      0.01       512
+        INTJ       0.00      0.00      0.00        36
+        NOUN       0.22      0.28      0.25       995
+        NULL       0.00      0.00      0.00     13344
+         NUM       0.03      0.02      0.02       127
+        PART       0.00      0.00      0.00        56
+        PRON       0.00      0.00      0.00       392
+       PROPN       0.32      0.22      0.26      1738
+        VERB       0.15      0.21      0.17       629
+
+    accuracy                           0.06     19924
+   macro avg       0.06      0.08      0.06     19924
+weighted avg       0.05      0.06      0.04     19924
+
+
+
+```
+```
+Overall
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.14      0.03       870
+         ADV       0.10      0.12      0.11      1084
+         AUX       0.00      0.00      0.00        90
+       CCONJ       0.00      0.00      0.00       152
+         DET       0.00      0.00      0.00        48
+        NOUN       0.01      0.46      0.01      3074
+        NULL       0.00      0.00      0.00    226008
+         NUM       0.00      0.01      0.00        89
+        PART       0.03      0.03      0.03       785
+        PRON       0.22      0.10      0.13      1443
+       SCONJ       0.00      0.00      0.00        97
+        VERB       0.07      0.03      0.04      1940
+
+    accuracy                           0.01    235680
+   macro avg       0.04      0.07      0.03    235680
+weighted avg       0.00      0.01      0.00    235680
+```
+
+The updated attachment scores for English are  
+LAS: 0.7268942547876769  
+UAS: 0.8175018698578908  
+
+and for Sanskrit are  
+LAS: 0.17532467532467533  
+UAS: 0.3785310734463277
 
 ## Parser
 The model performs the best on English, achieving an attachment score of approximately 95% (both labelled and unlabelled). We hypothesis that this is because of English's fixed word order and lack of morphological complexity.

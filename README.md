@@ -7,8 +7,8 @@ The locations of the various deliverables are as follows:
 * presentation file: [here](https://docs.google.com/presentation/d/196A3EmL12rHvy0UY90hPPvcuXjfh3QntaaZLwxdjTQQ/edit?usp=sharing)
 * project report: `report.pdf` in the home directory.
 * code: the `src/` subdirectory
-* data: the `data/` subdirectory
-* model checkpoints: the `models/` subdirectory
+* data: the `data/` subdirectory in [this drive folder](https://iiitaphyd-my.sharepoint.com/:f:/g/personal/shashwat_s_research_iiit_ac_in/EpWVVeDMvs5Hqsenxe84_9EBIYz-9rdh5B8cf50FKzGBvQ?e=vAXGl4)
+* model checkpoints: the `models/` subdirectory in [this drive folder](https://iiitaphyd-my.sharepoint.com/:f:/g/personal/shashwat_s_research_iiit_ac_in/EpWVVeDMvs5Hqsenxe84_9EBIYz-9rdh5B8cf50FKzGBvQ?e=vAXGl4)
 * README: `README.md` in the home directory.
 
 # Reference
