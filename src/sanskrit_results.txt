@@ -1,0 +1,618 @@
+Batch 1
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.13      0.03        31
+         ADV       0.13      0.12      0.13        32
+         AUX       0.00      0.00      0.00         5
+       CCONJ       0.00      0.00      0.00        10
+         DET       0.00      0.00      0.00         2
+        NOUN       0.01      0.59      0.01        92
+        NULL       0.00      0.00      0.00      7735
+         NUM       0.00      0.00      0.00         1
+        PART       0.00      0.00      0.00        10
+        PRON       0.12      0.04      0.06        28
+       SCONJ       0.00      0.00      0.00         1
+        VERB       0.05      0.02      0.03        53
+
+    accuracy                           0.01      8000
+   macro avg       0.03      0.07      0.02      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 2
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.11      0.02        28
+         ADV       0.00      0.00      0.00        28
+         AUX       0.00      0.00      0.00         2
+       CCONJ       0.00      0.00      0.00         6
+         DET       0.00      0.00      0.00         4
+        NOUN       0.01      0.45      0.01       106
+        NULL       0.00      0.00      0.00      7712
+         NUM       0.00      0.00      0.00         9
+        PART       0.00      0.00      0.00        12
+        PRON       0.25      0.11      0.15        45
+       SCONJ       0.00      0.00      0.00         4
+        VERB       0.14      0.07      0.09        44
+
+    accuracy                           0.01      8000
+   macro avg       0.03      0.06      0.02      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 3
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.12      0.03        32
+         ADV       0.10      0.11      0.10        36
+         AUX       0.00      0.00      0.00         3
+       CCONJ       0.00      0.00      0.00         4
+         DET       0.00      0.00      0.00         0
+        NOUN       0.01      0.42      0.01       118
+        NULL       0.00      0.00      0.00      7661
+         NUM       0.00      0.00      0.00         1
+        PART       0.00      0.00      0.00        23
+        PRON       0.12      0.06      0.08        49
+       SCONJ       0.00      0.00      0.00         4
+        VERB       0.05      0.01      0.02        69
+
+    accuracy                           0.01      8000
+   macro avg       0.02      0.06      0.02      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 4
+              precision    recall  f1-score   support
+
+         ADJ       0.03      0.22      0.05        32
+         ADV       0.00      0.00      0.00        30
+         AUX       0.00      0.00      0.00         1
+       CCONJ       0.00      0.00      0.00         2
+         DET       0.00      0.00      0.00         1
+        NOUN       0.01      0.48      0.01       105
+        NULL       0.00      0.00      0.00      7717
+         NUM       0.00      0.00      0.00         5
+        PART       0.00      0.00      0.00        16
+        PRON       0.00      0.00      0.00        29
+        VERB       0.00      0.00      0.00        62
+
+    accuracy                           0.01      8000
+   macro avg       0.00      0.06      0.01      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 5
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.12      0.02        26
+         ADV       0.14      0.12      0.13        42
+         AUX       0.00      0.00      0.00         1
+       CCONJ       0.00      0.00      0.00         0
+         DET       0.00      0.00      0.00         2
+        NOUN       0.01      0.43      0.01        94
+        NULL       0.00      0.00      0.00      7699
+         NUM       0.00      0.00      0.00         1
+        PART       0.00      0.00      0.00        17
+        PRON       0.08      0.02      0.03        46
+       SCONJ       0.00      0.00      0.00         5
+        VERB       0.04      0.01      0.02        67
+
+    accuracy                           0.01      8000
+   macro avg       0.02      0.06      0.02      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 6
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.10      0.01        20
+         ADV       0.06      0.07      0.06        44
+         AUX       0.00      0.00      0.00         3
+       CCONJ       0.00      0.00      0.00         2
+         DET       0.00      0.00      0.00         9
+        NOUN       0.01      0.51      0.02       127
+        NULL       0.00      0.00      0.00      7650
+         NUM       0.00      0.00      0.00         0
+        PART       0.03      0.02      0.03        43
+        PRON       0.11      0.05      0.07        40
+       SCONJ       0.00      0.00      0.00         1
+        VERB       0.09      0.03      0.05        61
+
+    accuracy                           0.01      8000
+   macro avg       0.03      0.07      0.02      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 7
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.26      0.04        23
+         ADV       0.02      0.02      0.02        43
+         AUX       0.00      0.00      0.00         2
+       CCONJ       0.00      0.00      0.00         6
+         DET       0.00      0.00      0.00         1
+        NOUN       0.01      0.44      0.01       108
+        NULL       0.00      0.00      0.00      7675
+         NUM       0.00      0.00      0.00         5
+        PART       0.00      0.00      0.00        29
+        PRON       0.22      0.11      0.14        46
+       SCONJ       0.00      0.00      0.00         2
+        VERB       0.00      0.00      0.00        60
+
+    accuracy                           0.01      8000
+   macro avg       0.02      0.07      0.02      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 8
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.21      0.04        29
+         ADV       0.21      0.21      0.21        52
+       CCONJ       0.00      0.00      0.00         4
+         DET       0.00      0.00      0.00         1
+        NOUN       0.01      0.39      0.01        99
+        NULL       0.00      0.00      0.00      7662
+         NUM       0.00      0.00      0.00         1
+        PART       0.05      0.03      0.04        35
+        PRON       0.31      0.11      0.17        44
+       SCONJ       0.00      0.00      0.00         7
+        VERB       0.04      0.02      0.02        66
+
+    accuracy                           0.01      8000
+   macro avg       0.06      0.09      0.04      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 9
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.13      0.02        23
+         ADV       0.09      0.10      0.09        31
+         AUX       0.00      0.00      0.00         1
+       CCONJ       0.00      0.00      0.00         2
+         DET       0.00      0.00      0.00         0
+        NOUN       0.00      0.35      0.01        91
+        NULL       0.00      0.00      0.00      7710
+         NUM       0.00      0.00      0.00         7
+        PART       0.00      0.00      0.00        31
+        PRON       0.12      0.08      0.10        38
+       SCONJ       0.00      0.00      0.00         4
+        VERB       0.04      0.02      0.02        62
+
+    accuracy                           0.01      8000
+   macro avg       0.02      0.06      0.02      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 10
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.12      0.03        32
+         ADV       0.06      0.06      0.06        34
+         AUX       0.00      0.00      0.00         0
+       CCONJ       0.00      0.00      0.00         2
+         DET       0.00      0.00      0.00         0
+        NOUN       0.01      0.51      0.01        76
+        NULL       0.00      0.00      0.00      7721
+         NUM       0.00      0.00      0.00         3
+        PART       0.11      0.05      0.07        37
+        PRON       0.22      0.15      0.18        52
+       SCONJ       0.00      0.00      0.00         0
+        VERB       0.08      0.05      0.06        43
+
+    accuracy                           0.01      8000
+   macro avg       0.04      0.08      0.03      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 11
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.11      0.02        18
+         ADV       0.10      0.12      0.11        41
+         AUX       0.00      0.00      0.00         0
+       CCONJ       0.00      0.00      0.00         3
+         DET       0.00      0.00      0.00         2
+        NOUN       0.01      0.46      0.02       129
+        NULL       0.00      0.00      0.00      7634
+         NUM       0.00      0.00      0.00         1
+        PART       0.09      0.06      0.07        36
+        PRON       0.28      0.11      0.16        63
+       SCONJ       0.00      0.00      0.00         2
+        VERB       0.04      0.01      0.02        71
+
+    accuracy                           0.01      8000
+   macro avg       0.04      0.07      0.03      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 12
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.18      0.04        34
+         ADV       0.04      0.04      0.04        49
+         AUX       0.00      0.00      0.00         3
+       CCONJ       0.00      0.00      0.00         2
+         DET       0.00      0.00      0.00         2
+        NOUN       0.00      0.32      0.01        93
+        NULL       0.00      0.00      0.00      7675
+         NUM       0.00      0.00      0.00         3
+        PART       0.04      0.03      0.03        32
+        PRON       0.28      0.11      0.16        45
+       SCONJ       0.00      0.00      0.00         2
+        VERB       0.04      0.02      0.02        60
+
+    accuracy                           0.01      8000
+   macro avg       0.04      0.06      0.03      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 13
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.17      0.04        30
+         ADV       0.16      0.12      0.14        50
+         AUX       0.00      0.00      0.00         2
+       CCONJ       0.00      0.00      0.00        10
+         DET       0.00      0.00      0.00         1
+        NOUN       0.01      0.43      0.01        95
+        NULL       0.00      0.00      0.00      7628
+         NUM       0.00      0.00      0.00         3
+        PART       0.16      0.07      0.10        40
+        PRON       0.06      0.02      0.03        41
+       SCONJ       0.00      0.00      0.00         7
+        VERB       0.09      0.03      0.05        93
+
+    accuracy                           0.01      8000
+   macro avg       0.04      0.07      0.03      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 14
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.10      0.02        31
+         ADV       0.11      0.12      0.11        50
+         AUX       0.00      0.00      0.00         1
+       CCONJ       0.00      0.00      0.00         5
+         DET       0.00      0.00      0.00         1
+        NOUN       0.01      0.43      0.01        90
+        NULL       0.00      0.00      0.00      7624
+         NUM       0.00      0.00      0.00         0
+        PART       0.06      0.04      0.04        57
+        PRON       0.22      0.14      0.17        50
+       SCONJ       0.00      0.00      0.00        10
+        VERB       0.10      0.04      0.05        81
+
+    accuracy                           0.01      8000
+   macro avg       0.04      0.07      0.03      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 15
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.12      0.04        33
+         ADV       0.04      0.05      0.04        42
+         AUX       0.00      0.00      0.00         6
+       CCONJ       0.00      0.00      0.00         5
+         DET       0.00      0.00      0.00         2
+        NOUN       0.01      0.48      0.01       111
+        NULL       0.00      0.00      0.00      7641
+         NUM       0.00      0.00      0.00         8
+        PART       0.08      0.05      0.06        37
+        PRON       0.11      0.07      0.09        42
+       SCONJ       0.00      0.00      0.00         5
+        VERB       0.13      0.06      0.08        68
+
+    accuracy                           0.01      8000
+   macro avg       0.03      0.07      0.03      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 16
+              precision    recall  f1-score   support
+
+         ADJ       0.00      0.05      0.01        20
+         ADV       0.20      0.22      0.21        49
+         AUX       0.00      0.00      0.00        11
+       CCONJ       0.00      0.00      0.00         2
+         DET       0.00      0.00      0.00         5
+        NOUN       0.01      0.44      0.02       138
+        NULL       0.00      0.00      0.00      7605
+         NUM       0.00      0.00      0.00         5
+        PART       0.10      0.14      0.12        21
+        PRON       0.15      0.10      0.12        58
+       SCONJ       0.00      0.00      0.00         6
+        VERB       0.29      0.07      0.12        80
+
+    accuracy                           0.01      8000
+   macro avg       0.06      0.09      0.05      8000
+weighted avg       0.01      0.01      0.00      8000
+
+Batch 17
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.14      0.04        42
+         ADV       0.08      0.14      0.10        37
+         AUX       0.00      0.00      0.00         8
+       CCONJ       0.00      0.00      0.00         9
+         DET       0.00      0.00      0.00         0
+        NOUN       0.01      0.42      0.01       113
+        NULL       0.00      0.00      0.00      7638
+         NUM       0.00      0.00      0.00         0
+        PART       0.07      0.07      0.07        27
+        PRON       0.26      0.11      0.16        54
+       SCONJ       0.00      0.00      0.00         2
+        VERB       0.04      0.01      0.02        70
+
+    accuracy                           0.01      8000
+   macro avg       0.04      0.07      0.03      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 18
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.16      0.03        25
+         ADV       0.15      0.20      0.17        30
+         AUX       0.00      0.00      0.00         1
+       CCONJ       0.00      0.00      0.00         7
+         DET       0.00      0.00      0.00         0
+        NOUN       0.00      0.35      0.01        82
+        NULL       0.00      0.00      0.00      7719
+         NUM       0.00      0.00      0.00         4
+        PART       0.00      0.00      0.00        18
+        PRON       0.43      0.18      0.26        55
+       SCONJ       0.00      0.00      0.00         3
+        VERB       0.17      0.07      0.10        56
+
+    accuracy                           0.01      8000
+   macro avg       0.07      0.08      0.05      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 19
+              precision    recall  f1-score   support
+
+         ADJ       0.03      0.24      0.05        33
+         ADV       0.05      0.06      0.06        32
+         AUX       0.00      0.00      0.00         5
+       CCONJ       0.00      0.00      0.00         9
+         DET       0.00      0.00      0.00         0
+        NOUN       0.00      0.49      0.01        70
+        NULL       0.00      0.00      0.00      7713
+         NUM       0.00      0.00      0.00         4
+        PART       0.00      0.00      0.00        14
+        PRON       0.38      0.08      0.14        60
+       SCONJ       0.00      0.00      0.00         3
+        VERB       0.06      0.02      0.03        57
+
+    accuracy                           0.01      8000
+   macro avg       0.04      0.07      0.02      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 20
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.05      0.02        66
+         ADV       0.14      0.21      0.16        29
+         AUX       0.00      0.00      0.00         0
+       CCONJ       0.00      0.00      0.00        25
+         DET       0.00      0.00      0.00         0
+        NOUN       0.01      0.55      0.02       146
+        NULL       0.00      0.00      0.00      7560
+         NUM       0.00      0.00      0.00         0
+        PART       0.00      0.00      0.00        18
+        PRON       0.25      0.06      0.10        78
+       SCONJ       0.00      0.00      0.00         0
+        VERB       0.00      0.00      0.00        78
+
+    accuracy                           0.01      8000
+   macro avg       0.03      0.07      0.03      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 21
+              precision    recall  f1-score   support
+
+         ADJ       0.03      0.18      0.05        39
+         ADV       0.11      0.19      0.14        21
+         AUX       0.00      0.00      0.00         2
+       CCONJ       0.00      0.00      0.00         5
+         DET       0.00      0.00      0.00         0
+        NOUN       0.01      0.44      0.01        90
+        NULL       0.00      0.00      0.00      7732
+         NUM       0.00      0.00      0.00         0
+        PART       0.00      0.00      0.00        21
+        PRON       0.09      0.02      0.04        41
+       SCONJ       0.00      0.00      0.00         4
+        VERB       0.04      0.02      0.03        45
+
+    accuracy                           0.01      8000
+   macro avg       0.02      0.07      0.02      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 22
+              precision    recall  f1-score   support
+
+         ADJ       0.00      0.04      0.01        23
+         ADV       0.13      0.18      0.15        22
+         AUX       0.00      0.00      0.00         1
+       CCONJ       0.00      0.00      0.00         2
+         DET       0.00      0.00      0.00         0
+        NOUN       0.00      0.37      0.01        86
+        NULL       0.00      0.00      0.00      7732
+         NUM       0.11      0.20      0.14         5
+        PART       0.00      0.00      0.00        23
+        PRON       0.26      0.13      0.17        47
+       SCONJ       0.00      0.00      0.00         1
+        VERB       0.07      0.03      0.05        58
+
+    accuracy                           0.01      8000
+   macro avg       0.05      0.08      0.04      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 23
+              precision    recall  f1-score   support
+
+         ADJ       0.05      0.33      0.09        40
+         ADV       0.04      0.07      0.05        29
+         AUX       0.00      0.00      0.00         7
+       CCONJ       0.00      0.00      0.00         1
+         DET       0.00      0.00      0.00         0
+        NOUN       0.00      0.39      0.01        76
+        NULL       0.00      0.00      0.00      7715
+         NUM       0.00      0.00      0.00         0
+        PART       0.00      0.00      0.00        21
+        PRON       0.09      0.02      0.04        43
+       SCONJ       0.00      0.00      0.00         9
+        VERB       0.12      0.03      0.05        59
+
+    accuracy                           0.01      8000
+   macro avg       0.03      0.07      0.02      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 24
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.13      0.02        15
+         ADV       0.17      0.10      0.12        51
+         AUX       0.00      0.00      0.00         3
+       CCONJ       0.00      0.00      0.00         6
+         DET       0.00      0.00      0.00         4
+        NOUN       0.00      0.43      0.01        86
+        NULL       0.00      0.00      0.00      7662
+         NUM       0.00      0.00      0.00         0
+        PART       0.03      0.03      0.03        31
+        PRON       0.27      0.20      0.23        71
+       SCONJ       0.00      0.00      0.00         3
+        VERB       0.05      0.01      0.02        68
+
+    accuracy                           0.01      8000
+   macro avg       0.04      0.08      0.04      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 25
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.15      0.03        34
+         ADV       0.24      0.15      0.19        59
+         AUX       0.00      0.00      0.00         5
+       CCONJ       0.00      0.00      0.00         6
+         DET       0.00      0.00      0.00         1
+        NOUN       0.01      0.63      0.02       140
+        NULL       0.00      0.00      0.00      7517
+         NUM       0.00      0.00      0.00         8
+        PART       0.00      0.00      0.00        71
+        PRON       0.16      0.09      0.11        56
+       SCONJ       0.00      0.00      0.00         5
+        VERB       0.04      0.01      0.02        98
+
+    accuracy                           0.01      8000
+   macro avg       0.04      0.09      0.03      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 26
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.14      0.02        22
+         ADV       0.09      0.13      0.10        31
+         AUX       0.00      0.00      0.00         4
+       CCONJ       0.00      0.00      0.00         3
+         DET       0.00      0.00      0.00         2
+        NOUN       0.01      0.64      0.02       149
+        NULL       0.00      0.00      0.00      7582
+         NUM       0.00      0.00      0.00         3
+        PART       0.00      0.00      0.00        34
+        PRON       0.25      0.08      0.12        65
+       SCONJ       0.00      0.00      0.00         3
+        VERB       0.00      0.00      0.00       102
+
+    accuracy                           0.01      8000
+   macro avg       0.03      0.08      0.02      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 27
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.10      0.02        29
+         ADV       0.08      0.15      0.11        26
+         AUX       0.00      0.00      0.00         3
+       CCONJ       0.00      0.00      0.00         4
+         DET       0.00      0.00      0.00         1
+        NOUN       0.01      0.45      0.01        95
+        NULL       0.00      0.00      0.00      7732
+         NUM       0.00      0.00      0.00         0
+        PART       0.05      0.07      0.06        14
+        PRON       0.33      0.06      0.10        36
+        VERB       0.00      0.00      0.00        60
+
+    accuracy                           0.01      8000
+   macro avg       0.04      0.08      0.03      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 28
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.09      0.01        23
+         ADV       0.07      0.12      0.09        17
+         AUX       0.00      0.00      0.00         3
+       CCONJ       0.00      0.00      0.00         2
+         DET       0.00      0.00      0.00         2
+        NOUN       0.01      0.50      0.01        96
+        NULL       0.00      0.00      0.00      7745
+         NUM       0.00      0.00      0.00         5
+        PART       0.00      0.00      0.00         9
+        PRON       0.23      0.08      0.12        38
+       SCONJ       0.00      0.00      0.00         3
+        VERB       0.27      0.05      0.09        57
+
+    accuracy                           0.01      8000
+   macro avg       0.05      0.07      0.03      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 29
+              precision    recall  f1-score   support
+
+         ADJ       0.01      0.20      0.02        15
+         ADV       0.20      0.29      0.24        28
+         AUX       0.00      0.00      0.00         3
+       CCONJ       0.00      0.00      0.00         3
+         DET       0.00      0.00      0.00         3
+        NOUN       0.01      0.43      0.01       126
+        NULL       0.00      0.00      0.00      7686
+         NUM       0.00      0.00      0.00         3
+        PART       0.00      0.00      0.00         5
+        PRON       0.30      0.13      0.18        61
+       SCONJ       0.00      0.00      0.00         1
+        VERB       0.20      0.05      0.07        66
+
+    accuracy                           0.01      8000
+   macro avg       0.06      0.09      0.04      8000
+weighted avg       0.00      0.01      0.00      8000
+
+Batch 30
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.14      0.04        22
+         ADV       0.00      0.00      0.00        19
+         AUX       0.00      0.00      0.00         4
+       CCONJ       0.00      0.00      0.00         5
+         DET       0.00      0.00      0.00         2
+        NOUN       0.01      0.51      0.01        47
+        NULL       0.00      0.00      0.00      3526
+         NUM       0.00      0.00      0.00         4
+        PART       0.00      0.00      0.00         3
+        PRON       0.50      0.27      0.35        22
+        VERB       0.00      0.00      0.00        26
+
+    accuracy                           0.01      3680
+   macro avg       0.05      0.08      0.04      3680
+weighted avg       0.00      0.01      0.00      3680
+
+Overall
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.14      0.03       870
+         ADV       0.10      0.12      0.11      1084
+         AUX       0.00      0.00      0.00        90
+       CCONJ       0.00      0.00      0.00       152
+         DET       0.00      0.00      0.00        48
+        NOUN       0.01      0.46      0.01      3074
+        NULL       0.00      0.00      0.00    226008
+         NUM       0.00      0.01      0.00        89
+        PART       0.03      0.03      0.03       785
+        PRON       0.22      0.10      0.13      1443
+       SCONJ       0.00      0.00      0.00        97
+        VERB       0.07      0.03      0.04      1940
+
+    accuracy                           0.01    235680
+   macro avg       0.04      0.07      0.03    235680
+weighted avg       0.00      0.01      0.00    235680
+
+Attachment label: 0.17532467532467533
+Attachment heads: 0.3785310734463277

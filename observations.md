@@ -158,3 +158,29 @@ Attachment heads: 0.5780141843971631
 
 
 
+# training pos with tripartite embedding 
+
+Overall
+              precision    recall  f1-score   support
+
+         ADJ       0.02      0.12      0.04       220
+         ADP       0.02      0.21      0.04      1434
+         ADV       0.00      0.01      0.00        76
+         AUX       0.00      0.00      0.00       256
+       CCONJ       0.00      0.00      0.00       109
+         DET       0.02      0.00      0.01       512
+        INTJ       0.00      0.00      0.00        36
+        NOUN       0.22      0.28      0.25       995
+        NULL       0.00      0.00      0.00     13344
+         NUM       0.03      0.02      0.02       127
+        PART       0.00      0.00      0.00        56
+        PRON       0.00      0.00      0.00       392
+       PROPN       0.32      0.22      0.26      1738
+        VERB       0.15      0.21      0.17       629
+
+    accuracy                           0.06     19924
+   macro avg       0.06      0.08      0.06     19924
+weighted avg       0.05      0.06      0.04     19924
+
+Attachment label: 0.7268942547876769
+Attachment heads: 0.8175018698578908
